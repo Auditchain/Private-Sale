@@ -21,7 +21,7 @@ contract Crowdsale is ReentrancyGuard, Ownable {
 
     
     IERC20 private _token;                              // The token being sold
-    uint256 tokensLeft;                                 // Amount of tokens in sale contract at given moment    
+    uint256 private _tokensLeft;                                 // Amount of tokens in sale contract at given moment    
     UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
@@ -82,7 +82,7 @@ contract Crowdsale is ReentrancyGuard, Ownable {
         // require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
         // require(amount != 0, "Token amount can't be 0");         
         _token.safeTransferFrom(msg.sender, address(this), amount);
-        tokensLeft = tokensLeft.add(amount);
+        _tokensLeft = _tokensLeft.add(amount);
         emit TokensDeposited(amount);
     }
     
@@ -91,9 +91,9 @@ contract Crowdsale is ReentrancyGuard, Ownable {
      */
     function _determineRate() internal view returns (uint256) {
 
-        if (tokensLeft < 5e24)
+        if (_tokensLeft < 5e24)
              return 150 * 1e15;
-        if (tokensLeft < 1e25)
+        if (_tokensLeft < 1e25)
             return 125 * 1e15;
         else  
             return  1e17;   
@@ -155,6 +155,7 @@ contract Crowdsale is ReentrancyGuard, Ownable {
 
         _forwardFunds(DAIAmountContributed);
         uint256 tokens = _deliverTokens(DAIAmount);
+        _tokensLeft = _tokensLeft.sub(tokens);
         
         emit TokensPurchased(beneficiary, weiAmount, tokens);
 
@@ -205,6 +206,14 @@ contract Crowdsale is ReentrancyGuard, Ownable {
     function DAIRaised() public view returns (uint256) {
         return _DAIRaised;
     }
+
+    /**
+     * @return amount of tokens left
+     */
+    function tokensLeft() public view returns (uint256) {
+        return _tokensLeft;
+    }
+
 
     /**
      * @dev Validation of an incoming purchase.
