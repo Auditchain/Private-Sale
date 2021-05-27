@@ -11,58 +11,37 @@ import "./WhiteList.sol";
 
 /**
  * @title Crowdsale
- * @dev Crowdsale is a base contract for managing a token crowdsale,
- * allowing investors to purchase tokens with ether. This contract implements
- * such functionality in its most fundamental form and can be extended to provide additional
- * functionality and/or custom behavior.
- * The external interface represents the basic interface for purchasing tokens, and conforms
- * the base architecture for crowdsales. It is *not* intended to be modified / overridden.
- * The internal interface conforms the extensible and modifiable surface of crowdsales. Override
- * the methods to add functionality. Consider using 'super' where appropriate to concatenate
- * behavior.
+ * @dev Crowdsale is a contract for managing a token crowdsale,
+ * allowing investors to purchase tokens with ether or DAI. 
  */
 contract Crowdsale is ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    address internal constant UNISWAP_ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D ;
-    address internal operator;
+   
+
+    
+    IERC20 private _token;                              // The token being sold
+    uint256 tokensLeft;                                 // Amount of tokens in sale contract at given moment    
+    UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
+    address payable private _wallet;                    // Address where funds are collected
+    uint256 private _weiRaised;                         // Amount of wei raised
+    uint256 private _DAIRaised;                         // Amount of DAI raised
+    address internal _operator;
     address public DAI;  
     WhiteList public whiteList;
 
-    // The token being sold
-    IERC20 private _token;
-
-    uint256 tokensLeft;
-    UniswapPriceOracle private _uniswapPriceOracle;
-
-    // Address where funds are collected
-    address payable private _wallet;
-
-    // uint256 weiAmount;
-
-    // Amount of wei raised
-    uint256 private _weiRaised;
-
-    //Amount of DAI raised
-    uint256 private _DAIRaised;
-
-    /**
-     * Event for token purchase logging    
-     * @param beneficiary who got the tokens
-     * @param value weis paid for purchase
-     * @param amount amount of tokens purchased
-     */
     event TokensPurchased(address indexed beneficiary, uint256 value, uint256 amount);
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
 
     /**    
-     * @dev The rate is the conversion between wei and the smallest and indivisible
-     * token unit. So, if you are using a rate of 1 with a ERC20Detailed token
-     * with 3 decimals called TOK, 1 wei will give you 1 unit, or 0.001 TOK.
+     * @dev constructor
      * @param oracle  contract address of the DAI/ETH price
      * @param cWallet Address where collected funds will be forwarded to
      * @param auditToken Address of the token being sold
+     * @param DAIAddress Address of DAI token
+     * @param whitelist Address of whitelist contract
+     * @param admin  user who can fund contract and pull out unused tokens
      */
     constructor (address oracle, 
                  address payable cWallet, 
@@ -73,32 +52,44 @@ contract Crowdsale is ReentrancyGuard, Ownable {
         require(oracle != address(0), "Crowdsale: oracle is the zero address");
         require(cWallet != address(0), "Crowdsale: wallet is the zero address");
         require(address(auditToken) != address(0), "Crowdsale: token is the zero address");
+        require(DAIAddress != address(0), "Crowdsale: DAI is zero address");
+        require(whitelist != address(0), "Crowdsale: Whitelist is zero address");
+        require(admin != address(0), "Crowdsale: Admin is zero address");
       
         _wallet = cWallet;
         _token = IERC20(auditToken);
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
-        DAI = DAIAddress;
+        _operator = admin;
         whiteList = WhiteList(whitelist);
-        operator = admin;
+        DAI = DAIAddress;
     }
 
-
-       modifier isOperator {
-            require(msg.sender == operator, "Sale:isOperator - Caller is not an operator");
+    /**
+    * @dev to check if user is authorized to do admin actions
+     */
+    modifier isOperator {
+            require(msg.sender == _operator, "Sale:isOperator - Caller is not an operator");
 
         _;
     }
 
+     /**
+     * @dev Fund crowdsale with tokens.
+     * @param amount - amount of tokens sent to crowdsale for sale
+     */
     function fundCrowdsale(uint256 amount) public isOperator() {
 
-        require(amount != 0, "Token amount can't be 0");        
+        // require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
+        // require(amount != 0, "Token amount can't be 0");         
         _token.safeTransferFrom(msg.sender, address(this), amount);
         tokensLeft = tokensLeft.add(amount);
         emit TokensDeposited(amount);
     }
     
-
-    function determineRate() public view returns (uint256) {
+    /**
+    * @dev determine rate of sale based on amount of tokens available in contract
+     */
+    function _determineRate() internal view returns (uint256) {
 
         if (tokensLeft < 5e24)
              return 150 * 1e15;
@@ -109,28 +100,39 @@ contract Crowdsale is ReentrancyGuard, Ownable {
            
     }
 
+    /**
+     * @dev find out ETH/DAI price
+     * @param amount - amount of ether to be checked against DAI 
+     * @return amount of DAI
+     */
     function calculateDAIForEther(uint256 amount) public view returns (uint256) {
 
        uint256[] memory pairAmounts = _uniswapPriceOracle.getEstimatedDAIForEth(amount);
        return pairAmounts[0];
     }
 
+    /**
+     * @dev calculate amount of tokens for available DAI
+     * @param DAIAmount - amount of DAI
+     * @return amount of tokens to be sent to contributor 
+     */
     function getTokenAmount(uint DAIAmount) public view returns(uint256){
 
-            uint256 _rate = determineRate();
+            uint256 _rate = _determineRate();
             return DAIAmount.mul(1e18).div(_rate);
 
     }
 
+    /**
+     * @dev function to be called for ETH contributions
+     */
     function buyTokens() public payable {
 
         buyTokens(0);
     }
 
      /**
-     * @dev low level token purchase ***DO NOT OVERRIDE***
-     * This function has a non-reentrancy guard, so it shouldn't be called by
-     * another `nonReentrant` function.
+     * @dev Function to purchase tokens     
      * @param DAIAmountContributed Amount of DAI contributed
      */
     function buyTokens(uint256 DAIAmountContributed) public nonReentrant payable {
@@ -184,10 +186,10 @@ contract Crowdsale is ReentrancyGuard, Ownable {
     }
 
     /**
-     * @return the number of token units a buyer gets per wei.
+     * @return the number of token units a buyer gets per DAI.
      */
     function rate() public view returns (uint256) {
-        return determineRate();
+        return _determineRate();
     }
 
     /**
@@ -197,25 +199,26 @@ contract Crowdsale is ReentrancyGuard, Ownable {
         return _weiRaised;
     }
 
+    /**
+     * @return amount of DAI raised
+     */
     function DAIRaised() public view returns (uint256) {
         return _DAIRaised;
     }
 
-
     /**
      * @dev Validation of an incoming purchase.
      * @param beneficiary Address performing the token purchase
-     * @param weiAmount Value in wei involved in the purchase
+     * @param weiAmount Value in wei or DAI involved in the purchase
      */
     function _preValidatePurchase(address beneficiary, uint256 weiAmount, uint256 DAIAmount) internal pure {
         require(beneficiary != address(0), "Crowdsale: beneficiary is the zero address");
         require(weiAmount != 0 || DAIAmount != 0, "Crowdsale: Both weiAmount and DAIAmount  can't be  0");
     }
 
-
     /**
      * @dev Deliver tokens to purchaser 
-     * @param DAIAmount - amount expressed in DAI/USD value
+     * @param DAIAmount - amount expressed in DAI value
      * @return amount of tokens delivered to purchaser
      */
     function _deliverTokens(uint256 DAIAmount) internal returns (uint256) {
