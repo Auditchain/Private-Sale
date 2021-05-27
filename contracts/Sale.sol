@@ -26,9 +26,9 @@ contract Crowdsale is ReentrancyGuard, Ownable {
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
     uint256 private _DAIRaised;                         // Amount of DAI raised
-    address internal _operator;
-    address public DAI;  
-    WhiteList public whiteList;
+    address internal _operator;                         // User authorized to fund and drain the contract
+    address public DAI;                                 // Address of DAI contract  
+    WhiteList public whiteList;                         // Address of white list.
 
     event TokensPurchased(address indexed beneficiary, uint256 value, uint256 amount);
     event TokensDeposited(uint256 amount);
