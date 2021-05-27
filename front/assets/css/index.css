@@ -1,0 +1,223 @@
+#text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}
+
+#moonraker{
+    color:white; 
+    font-size:40px; 
+    text-align: center; 
+    height:50px
+}
+
+
+
+.button {
+    display: inline-block;
+    background: teal;
+    color: #fff;
+    text-transform: uppercase;
+    padding: 4px 4px;
+    border-radius: 5px;
+    box-shadow: 0px 7px 2px -2px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    -webkit-transition: all ease-in-out 300ms;
+    transition: all ease-in-out 300ms;
+    font-size: 10px;
+    display: none;
+    font-weight:bold;
+    height:25px;
+}
+
+.button:hover {
+    /* box-shadow: 0px 37px 20px -20px rgba(0, 0, 0, 0.2); */
+    -webkit-transform: translate(0px, -5px) scale(1.2);
+    transform: translate(0px, -5px) scale(1.2);
+}
+
+.button:active {
+    /* box-shadow: 10px 37px 20px -20px rgba(0, 0, 0, 0.2); */
+    -webkit-transform: translate(3px, -2px) scale(1.2);
+    transform: translate(3px, -2px) scale(1.2);
+    background: red;
+}
+
+.buttonC {
+    display: inline-block;
+    background: white;
+    color: black;
+    text-transform: uppercase;
+    padding: 4px 4px;
+    border-radius: 5px;
+    box-shadow: 0px 7px 2px -2px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    -webkit-transition: all ease-in-out 300ms;
+    transition: all ease-in-out 300ms;
+    font-size: 10px;
+    /* display: none; */
+    font-weight:bold;
+    /* height:25px; */
+    z-index:1000;
+    position:relative;
+}
+
+.buttonC:hover {
+    /* box-shadow: 0px 37px 20px -20px rgba(0, 0, 0, 0.2); */
+    -webkit-transform: translate(0px, -5px) scale(1.2);
+    transform: translate(0px, -5px) scale(1.2);
+}
+
+.buttonC:active {
+    /* box-shadow: 10px 37px 20px -20px rgba(0, 0, 0, 0.2); */
+    -webkit-transform: translate(3px, -2px) scale(1.2);
+    transform: translate(3px, -2px) scale(1.2);
+    background: red;
+}
+
+
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover {
+
+    background: transparent; 
+    text-transform: none;
+}
+
+.card-signup .header {
+    background-color: teal; 
+    color:white;
+
+}
+
+.heading {
+
+    font-size:20px; 
+    font-weight: 500;
+}
+
+.message-error{
+
+    color:red; 
+    background-color: transparent; 
+    text-align: center;
+}
+
+.titles {
+    font-weight:bold;
+}
+
+#pool-table > thead > tr > th {
+    font-weight:bold; 
+    text-align:right;
+}
+
+#pool-table > tbody > tr > td {
+    text-align:left;
+}
+
+#pool-table > tbody > tr > td  {
+    text-align:right;
+}
+
+.header-half {
+
+    width:50%;
+    font-weight: bold;
+}
+
+
+#pool-table > thead,  #mission-table > thead {
+    border-bottom: 2px dotted #D2D2D2; 
+}   
+
+#mission-table > thead > tr > th {
+    font-weight:bold; 
+    text-align:left;
+}
+
+.timeline-description{
+    width:32%; 
+    display:inline-block; 
+    text-align: center;
+}
+
+.progress-description{
+
+    height: 4px; 
+    font-weight:600; 
+    font-size:1px;
+}
+
+
+
+.blink_me {
+    animation: blinker 1s linear infinite;
+    display:block;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.li {
+    color: black;
+}
+
+.nav-pills>li>a {
+    color: darkgrey;
+    font-size: 30px;
+    font-weight: 500;
+    display: flex;
+    min-width: 0px;
+}
+
+.status-display {
+
+    border-radius: 5px;
+    display:none; 
+    background-color: white; 
+    color:black; 
+    width:150px; 
+}
+
+.enableEthereumButtonMain {
+    width:190px; 
+    height:40px; 
+    display:none; 
+    background-color: teal;
+}
+
+.mission-status {
+
+    width:100%;  
+    text-align: center; 
+    font-size: 10px; 
+    position: absolute; 
+    height: 25px; 
+    padding-right:25px;
+}
+#loading {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    display: block;
+    opacity: 0.7;
+    background-color: #fff;
+    z-index: 99;
+    text-align: center;
+  }
+  
+  #loading-image {
+    display: block; 
+    margin-left: auto; 
+    margin-right: auto;    
+    z-index: 100;
+  }
+

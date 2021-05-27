@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Auditchain Private Sale</title>
+
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+
+    <!-- CSS Files -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../assets/css/material-kit.css" rel="stylesheet" />
+    <link href="../assets/css/index.css" rel="stylesheet" />
+</head>
+
+<body class="login-page">
+    <!-- <div id="loading">
+        <img id="loading-image"  src="../assets/img/loading.gif" alt="Loading..." />
+      </div> -->
+    <nav class="navbar navbar-primary navbar-transparent navbar-absolute">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img src="../assets/img/auditchain123.svg" width="160" alt="" height="60" class="pull-left">
+            </div>
+
+            <div class="collapse navbar-collapse" id="navigation-example">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <div id="status" class="status-display">
+                            <div id="address"></div>
+                            <div id="holdings"></div>
+                        </div>
+                    </li>
+                    <li>
+                        <button class="btn btn-gray enableEthereumButton enableEthereumButtonMain pull-right"
+                            id="connect-metamask">
+                            <i style="font-size: 40px;" class="material-icons">touch_app</i>Connect a Wallet
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="page-header header-filter"
+        style="background-image: url('../assets/img/card-5.jpeg'); background-size: cover; background-position: top center;">
+        <div class="container">
+            <div class="row">
+
+                
+                <div class="widget col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+                    <div class="card-content">
+                       
+                        <div id="moonraker">
+                            Auditchain Private Sale
+                        </div>
+                       
+                    </div>
+                    <div class="row col-md-8 col-md-offset-2">
+                        <div class="timeline-description">
+                            $0.10
+                        </div>
+                        <div class="timeline-description">
+                            $0.125
+                        </div>
+                        <div class="timeline-description">
+                            $0.15
+                        </div>
+                    </div>
+                    <div class="row col-md-8 col-md-offset-2">
+                        <div>
+                            <div class="mission-status">S a le&nbsp;&nbsp;S t a t u s
+                            </div>                            
+                        </div>
+                        <div class="progress progress-description">
+                            <div id="deposit-indicator" class="progress-bar progress-bar-info" role="progressbar"
+                                style="width: 33%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                            <div id="staking-indicator" class="progress-bar progress-bar-primary" role="progressbar"
+                                style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                            <div id="redeem-indicator" class="progress-bar progress-bar-success" role="progressbar"
+                                style="width: 10%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="display:flex; " class="col-md-12">
+                        <ul class="nav nav-pills nav-pills-primary pull-center">
+
+                            <li class="active">
+                                <a href="#pill1" data-toggle="tab" aria-expanded="true">DAI
+                                </a>
+                            </li>
+                            <!-- <li class="">
+                                <a href="#pill3" data-toggle="tab" aria-expanded="false">Pool</a>
+                            </li> -->
+
+                            <li class="">
+                                <a href="#pill2" data-toggle="tab" aria-expanded="false">Ether</a>
+                            </li>
+                            <li class="">
+                            
+                                </li>
+                        </ul>
+                    </div>
+                    <div id="change-mission" class="buttonC pull-center col-md-2 col-md-offset-10 col-sm-4 col-sm-offset-7 col-xs-4 col-sm-offset-8 pull-right" >
+                        <img src="../assets/img/DAOCapsule1.png" width="30" alt="" height="30" class="pull-left">
+                        Get Whitelisted</div>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="pill1">
+                            <div class="card card-signup">
+                              
+                                    <div class="header  text-center">
+                                        <div class="col-md-6 col-sm-6 col-xs-6">
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">DAI contributions
+                                            </div>
+                                            <div id="portfolio-value" class="col-md-12 col-sm-12 col-xs-12 titles">318,000
+                                                DAI
+                                            </div>
+                                            <div id="dcap-value" class="col-md-12 col-sm-12 col-xs-12 titles">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-6">
+
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">ETH/DAI</div>
+                                            <div id="current-value" class="col-md-12 col-sm-12 col-xs-12 titles">2,732.4566
+                                            </div>
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">&nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="blink_me">Sale in
+                                            progress</div>
+
+                                    </div>
+                                    <div class="content">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                            </span>
+                                            <div class="row">
+                                                <div class="col-md-6  col-sm-6 col-xs-9 heading">&nbsp;Use DAI to purchase AUDT</div>
+                                                <div id="msg-error-stake" class="col-md-6  col-sm-6 col-xs-6 message-error"></div>                                                   
+                                            </div>
+                                            <div class="col-md-1 col-sm-1 col-xs-1" style="padding: 18px 0;">
+                                                <img src="../assets/img/dai.png" width="100px">
+                                            </div>
+                                            <div class="col-md-11  col-sm-11 col-xs-11">
+                                                <input id="staking-amount" type="text" class="form-control"
+                                                    placeholder="Enter amount of DAI to contribute...">
+                                            </div>
+                                        </div>
+                                        <div class="footer text-center col-md-12  col-sm-12">
+                                            <div class="col-md-4 col-sm-4 col-xs-6">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="white-space: nowrap;">
+                                                    Price</div>
+                                                <div id="stake-apr" class="col-md-12 col-sm-12 col-xs-12 titles">0.10 DAI/ 1 AUDT
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-4 col-sm-4 col-xs-6">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="white-space: nowrap;">
+                                                    You receive</div>
+                                                <div id="earned-amount" class="col-md-12 col-sm-12 col-xs-12 titles">
+                                                    0.00
+                                                    AUDT</div>
+                                            </div>
+
+                                            <div class="col-md-4 col-sm-4 col-xs-12">
+
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="button enableEthereumButton">Connect wallet</div>
+                                                </div>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <div id="contribute" style="display: none;" class="button">
+                                                        Preauthorize</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">&nbsp;</div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="pill2">
+                            <div class="card card-signup">
+
+                                    <div class="header  text-center">
+                                        <div class="col-md-6 col-sm-6 col-xs-6">
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">Ether contributions
+                                            </div>
+                                            <div id="portfolio-value-to-take" class="col-md-12 col-sm-12 col-xs-12 titles">1,234.3558
+                                            </div>
+                                            <div id="dcap-to-take" class="col-md-12 col-sm-12 col-xs-12 titles">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-6">
+
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">ETH/DAI</div>
+                                            <div id="your-receipts" class="col-md-12 col-sm-12 col-xs-12 titles">2,732.4566
+                                            </div>
+                                            <div class="col-md-12 col-sm-12 col-xs-12 titles">&nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="blink_me">Sale in
+                                            progress</div>
+
+                                    </div>
+                                    <!-- <p class="description text-center">Or Be Classical</p> -->
+                                    <div class="content">
+
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <!-- <i class="material-icons">attach_money</i> -->
+                                            </span>
+                                            <div class="row">
+                                                <div class="col-md-8  col-sm-8 col-xs-10 heading">&nbsp;Use Ether to purchase AUDT</div>
+                                                <div id="msg-error-take" class="col-md-6  col-sm-6 col-xs-6 message-error">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1 col-sm-1 col-xs-1" style="padding: 18px 0;">
+                                                <img src="../assets/img/ether.png" width="100px">
+                                            </div>
+
+                                            <div class="col-md-11  col-sm-11 col-xs-11">
+                                                <div class="form-group label-floating">
+                                                    <input id="taking-amount" max="5" type="text" class="form-control"
+                                                        placeholder="Enter amount of Ether to contribute..">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="footer text-center col-md-12  col-sm-12">
+                                            <!-- <a href="#pablo" class="btn btn-primary btn-simple btn-wd btn-lg">Get
+                                                Started</a> -->
+
+                                            <div class="col-md-4 col-sm-4 col-xs-6">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="white-space: nowrap;">
+                                                    Price</div>
+                                                <div id="take-apr" class="col-md-12 col-sm-12 col-xs-12 titles">30,000 AUDT/1 ETH
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-4 col-sm-4 col-xs-6">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="white-space: nowrap;">
+                                                    You receive</div>
+                                                <div id="take-amount" class="col-md-12 col-sm-12 col-xs-12 titles">0.00
+                                                    AUDT</div>
+                                            </div>
+
+                                            <div class="col-md-4 col-sm-4 col-xs-12">
+
+                                                <div class="col-md-12 col-sm-12 col-xs-12"
+                                                    style="display: block; ; font-weight:bold;">
+                                                    <div class="button enableEthereumButton">Connect wallet</div>
+                                                </div>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <div id="take" style="display: none;" class="button">
+                                                        Take</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">&nbsp;</div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="pill3">
+                            <div class="card card-signup">
+
+                                <div class="header  text-center">
+                                    <!-- <h4 class="card-title">DAOCapsule 1</h4> -->
+                                    <div>
+                                        <div class="pull-left header-half">Mission Return</div>
+                                        <div class="pull-left header-half">AUDT/DAI</div>
+                                    </div>
+                                    <div>
+                                        <div id="return-percentage" class="pull-left header-half "
+                                           >&nbsp;</div>
+                                        <div id="audt-dai" class="pull-left header-half"
+                                            >&nbsp;</div>
+                                    </div>
+                                    <div class="blink_me"></div>
+                                    &nbsp;
+                                </div>
+                                <!-- <p class="description text-center">Or Be Classical</p> -->
+                                <div class="content">
+                                    <div class="row col-md-12">
+                                        <div id="current-block" class="col-md-4">
+                                            Now Block</div>
+                                        <div id="start-block" class="col-md-4">
+                                            Start Block</div>
+                                        <div id="end-block" class="col-md-4">
+                                            End Block</div>
+                                    </div>
+                                    <div class="card-content table-responsive row col-md-12"
+                                        style="margin: auto; border-spacing: 2px;">
+                                        <table id="pool-table" class="table">
+                                            <thead>
+                                                <th></th>
+                                                <th>AUDT</th>
+                                                <th>DAI</th>
+                                            </thead>
+                                            <tbody style="text-align:right">
+                                                <tr style="background-color: rgb(236, 236, 223) ;">
+                                                    <td style="text-align:left;">Mission Reward</td>
+                                                    <td class="number-tb-data" id="tb-mission-reward">0.00</td>
+                                                    <td id="tb-mission-reward-usd">0.00</td>
+                                                </tr>
+
+                                                <tr style="background-color: rgb(160, 219, 221) ;">
+                                                    <td  style="text-align:left;">Total Staked</td>
+                                                    <td id="tb-total-staked">0.00</td>
+                                                    <td id="tb-total-staked-usd">0.00</td>
+                                                </tr>
+                                                <tr style="background-color: rgb(236, 236, 223);">
+                                                    <td  style="text-align:left;">My Stake</td>
+                                                    <td id="tb-my-stake">0.00</td>
+                                                    <td id="tb-my-stake-usd">0.00</td>
+                                                </tr>
+                                                <tr style="background-color: rgb(160, 219, 221) ;">
+                                                    <td  style="text-align:left;">Total Redeemable</td>
+                                                    <td id="tb-current-reward">0.00</td>
+                                                    <td id="tb-current-reward-usd">0.00
+                                                    </td>
+                                                </tr>
+                                                <tr style="background-color: rgb(236, 236, 223);">
+                                                    <td  style="text-align:left;" id="dAudt-version">1 dAudt1</td>
+                                                    <td id="tb-ratio">0.00</td>
+                                                    <td id="tb-ratio-usd">0.00</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="card card-pricing card-raised">
+                                            <div class="content">
+                                                <p id="tb-governance-token-issued"></p>
+                                                <table class="table col-md-12">
+                                                    <tr>
+                                                        <td>My DCAP Reward at Expiration<br></td>
+                                                        <td id="tb-governance-token">0.00</td>
+                                                        <td id="tb-governance-token-usd">0.00</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" style="bottom:0px; position: fixed;   ">
+        <div class="container">
+            <nav class="pull-left">
+                <ul>
+
+                    <li>
+                        <a href="">
+                            About Us
+                        </a>
+                    </li>
+                    <li>
+                        <a href="">
+                            Blog
+                        </a>
+                    </li>
+                    <li>
+                        <a href="">
+                            Licenses
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="copyright pull-right">
+                &copy;
+                <script>document.write(new Date().getFullYear())</script>, made by <a
+                    href="http://www.blockchainexperts.com" target="_blank">BlockchainExperts</a>
+            </div>
+        </div>
+    </footer>
+
+    </div>
+
+   
+
+    <!-- Modal progress box start -->
+    <div class="modal fade" id="progress" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content box-window">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Completing your mission</h4>
+                    <span id="message-status-title"></span>
+                </div>
+                <div class="modal-body">
+                    <span id="message-status-body"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal progress box end -->
+
+
+
+    <!-- notice modal -->
+    <div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-notice">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
+                            class="material-icons">clear</i></button>
+                    <h5 class="modal-title" id="myModalLabel"></h5>
+                </div>
+                <div class="modal-body" id="modal-message">
+                    <div class="card-content table-responsive">
+                        <table id="mission-table" class="table table-striped table-no-bordered table-hover dtr-inline">
+                            <tbody>
+                                <thead>
+                                    <th>Mission</th>
+                                    <th>Reward</th>
+                                    <th>Status</th>
+                                    <th>Selection</th>
+                                </thead>
+                                <tr>
+                                    <td>MOONRAKER_1</td>
+                                    <td>4,500,000</td>
+                                    <td id="capsule1-status"></td>
+                                    <td>
+                                        <div class="togglebutton">
+                                            <label>
+                                                <input id="m1" type="radio" name="mission" checked>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MOONRAKER_2</td>
+                                    <td>9,000,000</td>
+                                    <td id="capsule2-status"></td>
+                                    <td>
+                                        <div class="togglebutton">
+                                            <label>
+                                                <input id="m2" type="radio" name="mission">
+
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MOONRAKER_3</td>
+                                    <td>13,500,000</td>
+                                    <td id="capsule3-status"></td>
+                                    <td>
+                                        <div class="togglebutton">
+                                            <label>
+                                                <input id="m3" type="radio" name="mission">
+
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MOONRAKER_4</td>
+                                    <td>18,000,000</td>
+                                    <td id="capsule4-status"></td>
+                                    <td>
+                                        <div class="togglebutton">
+                                            <label>
+                                                <input id="m4" type="radio" name="mission">
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>If you have more questions, don't hesitate to contact us or send us. We're here to help!</p>
+                </div>
+                <div class="modal-footer text-center">
+                    <button type="button" class="btn btn-info btn-round" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end notice modal -->
+
+</body>
+<!--   Core JS Files   -->
+
+<!-- <script src="../assets/js/provider.js"></script> -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.3.0/dist/web3.min.js"></script>
+<script src="../assets/js/jquery.min.js" type="text/javascript"></script>
+<script src="../assets/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../assets/js/material.min.js"></script>
+<script src="../assets/js/material-kit.js" type="text/javascript"></script>
+<script src="../assets/js/decimal.js" type="text/javascript"></script>
+<script src="../assets/js/script.js"></script>
+
+<!--  Notifications Plugin    -->
+<script src="../assets/js/bootstrap-notify.js"></script>
+
+<script type="text/javascript">
+
+    function autorun() {
+        init();
+    }
+    if (document.addEventListener) document.addEventListener("DOMContentLoaded", autorun, false);
+    else if (document.attachEvent) document.attachEvent("onreadystatechange", autorun);
+    else window.onload = autorun;
+</script>
+
+</html>
