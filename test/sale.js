@@ -59,7 +59,7 @@ contract("Sale contract", (accounts) => {
 
             let tokenInSale = await token.balanceOf(sale.address);
             assert.strictEqual(tokenInSale.toString(), fundingAmount);
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), rateAfterFunding);
         })
     })
@@ -137,7 +137,7 @@ contract("Sale contract", (accounts) => {
 
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "30000000000000000000000");
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "100000000000000000");
 
             let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
@@ -163,7 +163,7 @@ contract("Sale contract", (accounts) => {
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "24000000000000000000000");
 
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "125000000000000000");
             let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
             assert.strictEqual((walletBalanceAfter - walletBalanceBefore).toString(), purchaseAmount);
@@ -186,7 +186,7 @@ contract("Sale contract", (accounts) => {
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "20000000000000000000000");
 
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "150000000000000000");
             let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
             assert.strictEqual((walletBalanceAfter - walletBalanceBefore).toString(), purchaseAmount);
@@ -232,7 +232,7 @@ contract("Sale contract", (accounts) => {
 
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "30000000000000000000000");
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "100000000000000000");
 
             let walletDaiBalanceAfter = await dai.balanceOf(platformAccount);;
@@ -254,7 +254,7 @@ contract("Sale contract", (accounts) => {
 
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "24000000000000000000000");
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "125000000000000000");
 
             let walletDaiBalanceAfter = await dai.balanceOf(platformAccount);;
@@ -275,7 +275,7 @@ contract("Sale contract", (accounts) => {
 
             let userTokens = await token.balanceOf(holder1);
             assert.strictEqual(userTokens.toString(), "20000000000000000000000");
-            let rate = await sale.determineRate();
+            let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "150000000000000000");
 
             let walletDaiBalanceAfter = await dai.balanceOf(platformAccount);;
