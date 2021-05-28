@@ -153,6 +153,8 @@ contract Crowdsale is ReentrancyGuard {
             IERC20(DAI).safeTransferFrom(msg.sender, address(this), DAIAmountContributed);
         }
 
+        require(getTokenAmount(DAIAmount) <= 1e24, "Crowdsale:buyTokens - You can buy max 1 million AUDT tokens at a time");
+        
         _forwardFunds(DAIAmountContributed);
         uint256 tokens = _deliverTokens(DAIAmount);
         _tokensLeft = _tokensLeft.sub(tokens);
@@ -223,6 +225,7 @@ contract Crowdsale is ReentrancyGuard {
     function _preValidatePurchase(address beneficiary, uint256 weiAmount, uint256 DAIAmount) internal pure {
         require(beneficiary != address(0), "Crowdsale: beneficiary is the zero address");
         require(weiAmount != 0 || DAIAmount != 0, "Crowdsale: Both weiAmount and DAIAmount  can't be  0");
+        
     }
 
     /**

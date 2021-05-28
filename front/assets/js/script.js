@@ -475,7 +475,14 @@ $(document).ready(function () {
 
     $("#dai-contribution").keyup(function () {
 
-        if (Number(Number(this.value) * daiRate) > tokensLeft) {
+        $('#earned-amount').text(((Number(this.value) * daiRate)).formatMoney(2, ".", ",") + " AUDT");
+
+        if ((Number(this.value) * daiRate) >= 1e6) {
+            $("#msg-error-dai-contribution").css("background-color", "lightyellow");
+            $("#msg-error-dai-contribution").html("You can purchase maximum 1 million AUDT tokens at a time");
+            $("#contribute-dai").css("display", "none");
+        }
+        else if (Number(Number(this.value) * daiRate) > tokensLeft) {
             $("#msg-error-dai-contribution").css("background-color", "lightyellow");
             $("#msg-error-dai-contribution").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / daiRate).formatMoney(2, ".", ",") + " DAI");
             $("#contribute-dai").css("display", "none");
@@ -494,7 +501,15 @@ $(document).ready(function () {
 
     $("#ether-contribution").keyup(function () {
 
-        if (Number(Number(this.value) * ethRate) > tokensLeft) {
+        $('#take-amount').text(((Number(this.value) * ethRate)).formatMoney(2, ".", ",") + " AUDT");
+
+        if ((Number(this.value) * ethRate) >= 1e6) {
+            $("#msg-error-eth-contribution").css("background-color", "lightyellow");
+            $("#msg-error-eth-contribution").html("You can purchase maximum 1 million AUDT tokens at a time");
+            $("#contribute-ether").css("display", "none");
+        }
+
+        else if ((Number(this.value) * ethRate) > tokensLeft) {
             $("#msg-error-eth-contribution").css("background-color", "lightyellow");
             $("#msg-error-eth-contribution").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / ethRate).formatMoney(2, ".", ",") + " ETH");
             $("#contribute-ether").css("display", "none");
