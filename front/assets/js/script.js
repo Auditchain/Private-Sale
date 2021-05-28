@@ -2,16 +2,14 @@
 
 
 let buildDir, configDir, account, earningRatio, receipts, stakingTokenSymbol, stakingTokenName,
-    stakedAmount, totalReward, userHoldingsAUDT, conversionStable_AUDT,
-    startBlock, endBlock, tokenAddress, blockNumber, deploymentTime, deploymentStatus, chainId = "0x539";
+
+    tokenAddress, chainId = "0x539";
 
 // chainId = "0x4";
 
 let DAIAddress, oracleAddress, whitelistAddress, saleAddress, tokenContract, DAIContract, oracleContract, saleContract, whitelistContract,
     daiRate, ethRate, tokensLeft;
 
-
-// const uniswapPriceCheckerAddress =   "0x010DfD042cCe198fDb38F1Fcaf6169594488C446";
 
 // chainId = "0x539"
 
@@ -197,7 +195,6 @@ async function loadContracts() {
 
     // findCohorts();
 }
-
 
 
 async function loadConfig(fileName) {
@@ -404,16 +401,6 @@ function progressAction(msg, stage, id, last, first) {
     return id;
 }
 
-const promisify = (inner) =>
-    new Promise((resolve, reject) =>
-        inner((err, res) => {
-            if (err) {
-                reject(err)
-            }
-
-            resolve(res);
-        })
-    );
 
 Number.prototype.formatMoney = function (c, d, t) {
     var n = this,
