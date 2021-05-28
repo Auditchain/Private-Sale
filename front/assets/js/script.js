@@ -91,7 +91,7 @@ const ethEnabled = async () => {
     return false;
 };
 
-async function getAccount(capsuleNumber) {
+async function getAccount() {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
     account = accounts[0];
     const showAccount = document.querySelector('.showAccount');
@@ -101,9 +101,14 @@ async function getAccount(capsuleNumber) {
     }).then(function (res, err) {
         return loadInitialValues();
     }).then(function (res, err) {
-        displayProgress(1);
-    }).then(function () {
-        $('#loading').hide();
+        displayProgress();
+    }).then(function (res, err) {
+        return checkWhitelisted();
+    }).then(function (isWhitelisted) {
+        if (isWhitelisted)
+            $('#loading').hide();
+        else
+            $("#noticeModal").modal();
     }).catch(function (res) {
         console.log(res);
     })
@@ -136,6 +141,20 @@ async function loadInitialValues() {
     $("#rate-eth").html(Number(ethRate).formatMoney(2, ".", ",") + " AUDT/ETH   ");
 
     displayProgress();
+
+}
+
+async function checkWhitelisted() {
+
+    let whitelisted = await whitelistContract.methods.isWhitelisted(account).call();
+    return whitelisted;
+
+}
+
+function clearInputs() {
+
+    $("#ether-contribution").val("");
+    $("#dai-contribution").val("");
 
 }
 
@@ -205,14 +224,14 @@ async function displayProgress() {
     let first, firstText, second, secondText, third, thirdText;
 
     if (tokensLeft <= 5000000) {
-        first = 34;
+        first = 33;
         firstText = "100%";
-        second = 34;
+        second = 33;
         secondText = "100%"
         third = (5000000 - tokensLeft) * 100 / 5000000 * 33 / 100;
         thirdText = (5000000 - tokensLeft) * 100 / 5000000;
     } else if (tokensLeft <= 10000000) {
-        first = 34;
+        first = 33;
         firstText = "100%";
         second = (10000000 - tokensLeft) * 100 / 10000000 * 33 / 100;
         secondText = (10000000 - tokensLeft) * 100 / 10000000
@@ -470,14 +489,14 @@ $(document).ready(function () {
     $("#dai-contribution").keyup(function () {
 
         if (Number(Number(this.value) * daiRate) > tokensLeft) {
-            $("#msg-error-stake").css("background-color", "lightyellow");
-            $("#msg-error-stake").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / daiRate).formatMoney(2, ".", ",") + " DAI");
+            $("#msg-error-dai-contribution").css("background-color", "lightyellow");
+            $("#msg-error-dai-contribution").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / daiRate).formatMoney(2, ".", ",") + " DAI");
             $("#contribute-dai").css("display", "none");
         }
         else {
             $('#earned-amount').text(((Number(this.value) * daiRate)).formatMoney(2, ".", ",") + " AUDT");
-            $("#msg-error-stake").css("background-color", "transparent");
-            $("#msg-error-stake").html("");
+            $("#msg-error-dai-contribution").css("background-color", "transparent");
+            $("#msg-error-dai-contribution").html("");
             if (Number(this.value) > 0) {
                 $("#contribute-dai").css("display", "block");
             }
@@ -489,14 +508,14 @@ $(document).ready(function () {
     $("#ether-contribution").keyup(function () {
 
         if (Number(Number(this.value) * ethRate) > tokensLeft) {
-            $("#msg-error-take").css("background-color", "lightyellow");
-            $("#msg-error-take").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / ethRate).formatMoney(2, ".", ",") + " ETH");
+            $("#msg-error-eth-contribution").css("background-color", "lightyellow");
+            $("#msg-error-eth-contribution").html("Exceeded available supply. Maximum you can contribute is " + (tokensLeft / ethRate).formatMoney(2, ".", ",") + " ETH");
             $("#contribute-ether").css("display", "none");
         }
         else {
             $('#take-amount').text(((Number(this.value) * ethRate)).formatMoney(2, ".", ",") + " AUDT");
-            $("#msg-error-take").css("background-color", "transparent");
-            $("#msg-error-take").html("");
+            $("#msg-error-eth-contribution").css("background-color", "transparent");
+            $("#msg-error-eth-contribution").html("");
             if (Number(this.value) > 0) {
                 $("#contribute-ether").css("display", "block");
             }
@@ -509,6 +528,8 @@ $(document).ready(function () {
             return buyTokensForDai();
         }).then(function (res, err) {
             loadInitialValues();
+        }).then(function (res, err) {
+            clearInputs();
         }).catch(function (res) {
             console.log(res);
             progressAction(res.message, 2, 2, true, true);
@@ -521,6 +542,8 @@ $(document).ready(function () {
         buyTokensForEth().then(function () {
         }).then(function (res, err) {
             loadInitialValues();
+        }).then(function (res, err) {
+            clearInputs();
         }).catch(function (res) {
             console.log(res);
             progressAction(res.message, 2, 2, true, true);
