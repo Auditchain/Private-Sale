@@ -79,7 +79,7 @@ contract Crowdsale is ReentrancyGuard {
      */
     function fundCrowdsale(uint256 amount) public isOperator() {
 
-        require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
+        // require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
         // require(amount != 0, "Token amount can't be 0");         
         _token.safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = _tokensLeft.add(amount);
