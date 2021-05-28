@@ -270,8 +270,11 @@ function buyTokensForDai() {
                 const event = receipt.events.TokensPurchased.returnValues;
                 const amount = event.amount;
 
+                // amountToShow = new Decimal(Number(amount.toString())).dividedBy(Math.pow(10, 18));
+                let amountToShow = new Decimal(amount).dividedBy(Math.pow(10, 18))
+
                 progressAction(
-                    "You have successfully purchased: " + Number(amount) / Math.pow(10, 18) + " AUDT tokens",
+                    "You have successfully purchased: " + amountToShow + " AUDT tokens",
                     2,
                     id,
                     false,
@@ -305,7 +308,7 @@ function buyTokensForEth() {
                 const amount = event.amount;
 
                 progressAction(
-                    "You have successfully purchased: " + Number(amount) / Math.pow(10, 18) + " AUDT tokens",
+                    "You have successfully purchased: " + new Decimal(amount).dividedBy(Math.pow(10, 18)) + " AUDT tokens",
                     2,
                     id,
                     false,
