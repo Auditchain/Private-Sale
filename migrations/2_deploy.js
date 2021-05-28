@@ -11,7 +11,7 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     const owner = accounts[0];
     const holder1 = accounts[1];
     const platformAccount = accounts[2];
-    let fundingAmount = "11000000000000000000000000";
+    let fundingAmount = "15000000000000000000000000";
     let daiFunds = "300000000000000000000000"
 
 
