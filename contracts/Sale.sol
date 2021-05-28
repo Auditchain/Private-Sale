@@ -4,7 +4,7 @@ pragma solidity =0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ReentrancyGuard.sol";
 import "./UniswapPriceOracle.sol";
 import "./WhiteList.sol";
@@ -14,7 +14,7 @@ import "./WhiteList.sol";
  * @dev Crowdsale is a contract for managing a token crowdsale,
  * allowing investors to purchase tokens with ether or DAI. 
  */
-contract Crowdsale is ReentrancyGuard, Ownable {
+contract Crowdsale is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
@@ -79,7 +79,7 @@ contract Crowdsale is ReentrancyGuard, Ownable {
      */
     function fundCrowdsale(uint256 amount) public isOperator() {
 
-        // require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
+        require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
         // require(amount != 0, "Token amount can't be 0");         
         _token.safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = _tokensLeft.add(amount);
