@@ -1,3 +1,4 @@
+import { platform } from 'ethers';
 import {
     ensureException,
     duration
@@ -16,8 +17,8 @@ contract("Sale contract", (accounts) => {
 
     const owner = accounts[0];
     const holder1 = accounts[1];
+    const holder2 = accounts[2];
     const platformAccount = accounts[6];
-    const addressZero = "0x0000000000000000000000000000000000000000"
 
 
     let dai;
@@ -29,10 +30,6 @@ contract("Sale contract", (accounts) => {
     let rateAfterFunding = "100000000000000000";
     let daiFunds = "3000000000000000000000"
 
-    // let cohortAddress;
-    // let cohortContract;
-    // let result;
-    // let SETTER_ROLE = web3.utils.keccak256("SETTER_ROLE");
 
     beforeEach(async () => {
 
@@ -49,7 +46,6 @@ contract("Sale contract", (accounts) => {
         await dai.transfer(holder1, daiFunds, { from: owner });
 
     })
-
 
     describe("Deploy", async () => {
 
@@ -150,14 +146,18 @@ contract("Sale contract", (accounts) => {
         it("Should succeed. User should receive tokens when sending ether to the contract. DAI price is 3000/ether, rate 0.125 DAI", async () => {
             console.log("     User should receive 24,000 AUDT tokens.");
 
-            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
+            await whiteList.addWhitelisted(holder2, { from: owner });
+            for (let i = 0; i < 10; i++) {
 
-            sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
-            let fundingAmount = "9000000000000000000000000";  //second price level at 0.125 DAI
+                let purchaseAmount = web3.utils.toWei('20', 'ether');
+                await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+
+            }
+
             let purchaseAmount = web3.utils.toWei('1', 'ether');
+            await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
 
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundCrowdsale(fundingAmount, { from: owner });
+            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
             await whiteList.addWhitelisted(holder1, { from: owner });
             await sale.buyTokens("0", { value: purchaseAmount, from: holder1 });
 
@@ -176,13 +176,18 @@ contract("Sale contract", (accounts) => {
         it("Should succeed. User should receive tokens when sending ether to the contract. DAI price is 3000/ether, rate 0.15 DAI", async () => {
             console.log("     User should receive 20,000 AUDT tokens.");
 
-            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
-            sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
-            let fundingAmount = "4000000000000000000000000";  //second price level at 0.15 DAI
-            let purchaseAmount = web3.utils.toWei('1', 'ether');
+            await whiteList.addWhitelisted(holder2, { from: owner });
+            for (let i = 0; i < 30; i++) {
 
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundCrowdsale(fundingAmount, { from: owner });
+                let purchaseAmount = web3.utils.toWei('20', 'ether');
+                await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+
+            }
+
+            let purchaseAmount = web3.utils.toWei('1', 'ether');
+            await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+
+            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
             await whiteList.addWhitelisted(holder1, { from: owner });
             await sale.buyTokens("0", { value: purchaseAmount, from: holder1 });
 
@@ -243,16 +248,22 @@ contract("Sale contract", (accounts) => {
 
             let walletDaiBalanceAfter = await dai.balanceOf(platformAccount);;
             assert.strictEqual(walletDaiBalanceAfter.toString(), daiFunds);
-
         })
 
         it("Should succeed. User should receive tokens when sending 3000 DAI to the contract at the rate 0.125/DAI", async () => {
             console.log("     User should receive 24,000 AUDT tokens.");
 
-            sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
-            let fundingAmount = "9000000000000000000000000";  //second price level at 0.125 DAI
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundCrowdsale(fundingAmount, { from: owner });
+
+            await whiteList.addWhitelisted(holder2, { from: owner });
+            for (let i = 0; i < 10; i++) {
+
+                let purchaseAmount = web3.utils.toWei('20', 'ether');
+                await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+            }
+
+
+            let purchaseAmount = web3.utils.toWei('1', 'ether');
+            await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
 
             await whiteList.addWhitelisted(holder1, { from: owner });
             await dai.increaseAllowance(sale.address, daiFunds, { from: holder1 });
@@ -270,10 +281,17 @@ contract("Sale contract", (accounts) => {
         it("Should succeed. User should receive tokens when sending 3000 DAI to the contract at the rate 0.15/DAI", async () => {
             console.log("     User should receive 20,000 AUDT tokens.");
 
-            sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
-            let fundingAmount = "4000000000000000000000000";  //second price level at 0.125 DAI
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundCrowdsale(fundingAmount, { from: owner });
+            await whiteList.addWhitelisted(holder2, { from: owner });
+            for (let i = 0; i < 30; i++) {
+
+                let purchaseAmount = web3.utils.toWei('20', 'ether');
+                await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+
+            }
+
+            let purchaseAmount = web3.utils.toWei('1', 'ether');
+            await sale.buyTokens("0", { value: purchaseAmount, from: holder2 });
+
 
             await whiteList.addWhitelisted(holder1, { from: owner });
             await dai.increaseAllowance(sale.address, daiFunds, { from: holder1 });
@@ -377,8 +395,8 @@ contract("Sale contract", (accounts) => {
             await whiteList.addWhitelisted(holder1, { from: owner });
             let result = await sale.buyTokens("0", { value: purchaseAmount, from: holder1 });
 
-            assert.lengthOf(result.logs, 1);
-            let event = result.logs[0];
+            assert.lengthOf(result.logs, 2);
+            let event = result.logs[1];
             assert.equal(event.event, 'TokensPurchased');
             assert.equal(event.args.value, purchaseAmount);
         })
@@ -403,6 +421,34 @@ contract("Sale contract", (accounts) => {
             let event = result.logs[0];
             assert.equal(event.event, 'TokensWithdrawn');
             assert.equal(event.args.amount, fundingAmount);
+        })
+
+
+        it('should log FundsForwarded after sending ether to contract', async () => {
+
+
+
+            let purchaseAmount = web3.utils.toWei('1', 'ether');
+
+            await whiteList.addWhitelisted(holder1, { from: owner });
+            let result = await sale.buyTokens("0", { value: purchaseAmount, from: holder1 });
+
+            assert.lengthOf(result.logs, 2);
+            let event = result.logs[0];
+            assert.equal(event.event, 'FundsForwarded');
+            assert.equal(event.args.eth, web3.utils.toWei('1', 'ether'));
+        })
+
+        it('should log FundsForwarded after sending DAI to contract', async () => {
+
+            await dai.increaseAllowance(sale.address, daiFunds, { from: holder1 });
+            await whiteList.addWhitelisted(holder1, { from: owner });
+            let result = await sale.buyTokens(daiFunds, { from: holder1 });
+
+            assert.lengthOf(result.logs, 2);
+            let event = result.logs[0];
+            assert.equal(event.event, 'FundsForwarded');
+            assert.equal(event.args.dai.toString(), daiFunds);
         })
     })
 
