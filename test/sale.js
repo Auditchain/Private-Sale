@@ -9,6 +9,8 @@ const ORACLE = artifacts.require('../UniswapPriceOracle');
 const SALE = artifacts.require('../Crowdsale');
 const WHITELIST = artifacts.require('../WhiteList');
 
+var BN = web3.utils.BN;
+
 
 contract("Sale contract", (accounts) => {
 
@@ -79,7 +81,6 @@ contract("Sale contract", (accounts) => {
             await whiteList.removeWhitelisted(holder1, { from: owner });
             let isWhiteListed = await whiteList.isWhitelisted(holder1);
             assert.strictEqual(isWhiteListed, false);
-            // console.log("User whitelisted:", isWhiteListed.toString());
         })
 
 
@@ -129,7 +130,7 @@ contract("Sale contract", (accounts) => {
         it("Should succeed. User should receive tokens when sending ether to the contract. DAI price is 3000/ether, rate 0.1 DAI", async () => {
             console.log("     User should receive 30,000 AUDT tokens.");
 
-            let walletBalanceBefore = await web3.eth.getBalance(platformAccount);
+            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
             let purchaseAmount = web3.utils.toWei('1', 'ether');
 
             await whiteList.addWhitelisted(holder1, { from: owner });
@@ -140,16 +141,16 @@ contract("Sale contract", (accounts) => {
             let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "100000000000000000");
 
-            let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
-            assert.strictEqual((walletBalanceAfter - walletBalanceBefore).toString(), purchaseAmount);
-
+            let walletBalanceAfter = new BN(await web3.eth.getBalance(platformAccount));
+            let difference = new BN(walletBalanceAfter).sub(walletBalanceBefore);
+            assert.strictEqual(difference.toString(), purchaseAmount.toString());
 
         })
 
         it("Should succeed. User should receive tokens when sending ether to the contract. DAI price is 3000/ether, rate 0.125 DAI", async () => {
             console.log("     User should receive 24,000 AUDT tokens.");
 
-            let walletBalanceBefore = await web3.eth.getBalance(platformAccount);
+            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
 
             sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
             let fundingAmount = "9000000000000000000000000";  //second price level at 0.125 DAI
@@ -165,15 +166,17 @@ contract("Sale contract", (accounts) => {
 
             let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "125000000000000000");
-            let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
-            assert.strictEqual((walletBalanceAfter - walletBalanceBefore).toString(), purchaseAmount);
+            let walletBalanceAfter = new BN(await web3.eth.getBalance(platformAccount));
+
+            let difference = new BN(walletBalanceAfter).sub(walletBalanceBefore);
+            assert.strictEqual(difference.toString(), purchaseAmount.toString());
 
         })
 
         it("Should succeed. User should receive tokens when sending ether to the contract. DAI price is 3000/ether, rate 0.15 DAI", async () => {
             console.log("     User should receive 20,000 AUDT tokens.");
 
-            let walletBalanceBefore = await web3.eth.getBalance(platformAccount);
+            let walletBalanceBefore = new BN(await web3.eth.getBalance(platformAccount));
             sale = await SALE.new(oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
             let fundingAmount = "4000000000000000000000000";  //second price level at 0.15 DAI
             let purchaseAmount = web3.utils.toWei('1', 'ether');
@@ -188,8 +191,11 @@ contract("Sale contract", (accounts) => {
 
             let rate = await sale.rate();
             assert.strictEqual(rate.toString(), "150000000000000000");
-            let walletBalanceAfter = await web3.eth.getBalance(platformAccount);
-            assert.strictEqual((walletBalanceAfter - walletBalanceBefore).toString(), purchaseAmount);
+            let walletBalanceAfter = new BN(await web3.eth.getBalance(platformAccount));
+
+            let difference = new BN(walletBalanceAfter).sub(walletBalanceBefore);
+            assert.strictEqual(difference.toString(), purchaseAmount.toString());
+
 
         })
 
