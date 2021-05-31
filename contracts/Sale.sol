@@ -21,7 +21,7 @@ contract Crowdsale is ReentrancyGuard {
 
     
     IERC20 private _token;                              // The token being sold
-    uint256 private _tokensLeft;                                 // Amount of tokens in sale contract at given moment    
+    uint256 private _tokensLeft;                        // Amount of tokens in sale contract at given moment    
     UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
@@ -222,7 +222,8 @@ contract Crowdsale is ReentrancyGuard {
     /**
      * @dev Validation of an incoming purchase.
      * @param beneficiary Address performing the token purchase
-     * @param weiAmount Value in wei or DAI involved in the purchase
+     * @param weiAmount Value in wei involved in the purchase
+     * @param DAIAmount value of DAI involved in the purchase
      */
     function _preValidatePurchase(address beneficiary, uint256 weiAmount, uint256 DAIAmount) internal pure {
         require(beneficiary != address(0), "Crowdsale: beneficiary is the zero address");
