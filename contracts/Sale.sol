@@ -33,6 +33,7 @@ contract Crowdsale is ReentrancyGuard {
     event TokensPurchased(address indexed beneficiary, uint256 value, uint256 amount);
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
+    event FundsForwarded(uint256 eth, uint256 dai);
 
     /**    
      * @dev constructor
@@ -79,8 +80,7 @@ contract Crowdsale is ReentrancyGuard {
      */
     function fundCrowdsale(uint256 amount) public isOperator() {
 
-        // require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
-        // require(amount != 0, "Token amount can't be 0");         
+        require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
         _token.safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = _tokensLeft.add(amount);
         emit TokensDeposited(amount);
@@ -240,6 +240,8 @@ contract Crowdsale is ReentrancyGuard {
             _wallet.transfer(msg.value);
         else
             IERC20(DAI).safeTransfer(_wallet, DAIAmount);
+
+        emit FundsForwarded(msg.value, DAIAmount);
 
     }
     /**
