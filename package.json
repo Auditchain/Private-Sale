@@ -4,8 +4,12 @@
   "description": "Auditchain MVP",
   "main": "index.js",
   "scripts": {
-    "test": "scripts/test.sh",
+    "ganache": "ganache-cli -m 'tilt divorce crane stereo unusual another core claw fury fury warm labor' -e 10000",
+    "test_old": "scripts/test.sh",
+    "test": "truffle test",
+    "test:contract:sale": "truffle test ./test/sale.js",
     "compile": "truffle compile --optimize-runs 200",
+    "deploy": "truffle deploy --reset",
     "migrate-local": "truffle migrate --network=development --reset",
     "migrate-ropsten": "truffle migrate --network=ropsten --reset",
     "flatten": "sol-merger './contracts/NFT/*.sol' ./flat",

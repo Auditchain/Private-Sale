@@ -339,3 +339,5 @@ pages/
 dist/
 package-lock.json
 build/contracts/
+ganache-accounts.json
+.DS_Store
