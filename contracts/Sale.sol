@@ -4,7 +4,6 @@ pragma solidity =0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ReentrancyGuard.sol";
 import "./UniswapPriceOracle.sol";
 import "./WhiteList.sol";
@@ -19,9 +18,6 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
-
-    
-    // IERC20 private _token;                              // The token being soldinstantAmount
     uint256 private _tokensLeft;                        // Amount of tokens in sale contract at given moment    
     UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
