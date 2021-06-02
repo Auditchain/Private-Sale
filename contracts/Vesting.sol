@@ -25,11 +25,9 @@ contract Vesting  {
     uint256 public duration;        // duration of period in which vesting takes place   
     IERC20  internal  _token;        // token contract containing tokens
     mapping(address => TokenHolder) public tokenHolders; //tokenHolder list
-    // uint256 public constant CLIFF = 336;   //336 hours  2 weeks
-    // uint256 public constant DURATION = 8784; //8784 hours ~ 1 year
 
-    uint256 public constant CLIFF = 60 * 60 * 24 * 14;   
-    uint256 public constant DURATION = 60 * 60 * 24 * 366; 
+    uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
+    uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
     address public admin;
     
 
@@ -67,10 +65,21 @@ contract Vesting  {
     function revoke(address _user) public {
 
         require(msg.sender == admin, "Vesting:revoke - You are not authorized to call this function.");
-
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
     }
+
+    /**
+    * @dev owner can reinstate access to continue vesting of tokens
+    * @param _user {address} of user to reinstate their right to vesting    
+    */
+    function reinstate(address _user) public {
+
+        require(msg.sender == admin, "Vesting:reinstate - You are not authorized to call this function.");
+        TokenHolder storage tokenHolder = tokenHolders[_user];
+        tokenHolder.revoked = false; 
+    }
+
     /**
     * @dev Show amount of token still available for vesting 
     * @return amount {uint} tokens still available for vesting
