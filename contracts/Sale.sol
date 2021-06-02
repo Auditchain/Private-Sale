@@ -55,7 +55,6 @@ contract Crowdsale is Vesting, ReentrancyGuard {
         require(admin != address(0), "Crowdsale: Admin is zero address");
       
         _wallet = cWallet;
-        // _token = IERC20(auditToken);
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
         _operator = admin;
         whiteList = WhiteList(whitelist);
