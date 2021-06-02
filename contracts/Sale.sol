@@ -31,6 +31,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
     event FundsForwarded(uint256 eth, uint256 dai);
+    event MemberFunded(address beneficiary, uint256 amount);
 
     /**    
      * @dev constructor
@@ -80,6 +81,17 @@ contract Crowdsale is Vesting, ReentrancyGuard {
         _token.safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = amount;
         emit TokensDeposited(amount);
+    }
+
+    function fundUser(address beneficiary, uint256 amount) public isOperator() {
+
+       // require(address(beneficiary) != address(0), "Crowdsale:fundUser - beneficiary can't be the zero address");      
+      //  require(amount != 0, "Crowdsale:fundUser Amount can't be 0");
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        tokenHolder.tokensToSend += amount;
+      //  emit  MemberFunded(beneficiary, amount);
+
     }
     
     /**
@@ -255,9 +267,9 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     /**
      * @dev Claim unsold tokens after campaign 
      */
-    function claimUnsoldTokens() public isOperator() {
+    function claimUnsoldTokens() public nonReentrant isOperator() {
         IERC20(_token).safeTransfer(_wallet, _tokensLeft);
-        _tokensLeft = 0;
         emit TokensWithdrawn(_tokensLeft);
+        _tokensLeft = 0;
     }
 }
