@@ -5,6 +5,28 @@ const SALE = artifacts.require('../Crowdsale');
 const WHITELIST = artifacts.require('../WhiteList');
 
 
+// const advanceBlockAtTime = (time) => {
+//     return new Promise((resolve, reject) => {
+//         web3.currentProvider.send(
+//             {
+//                 jsonrpc: "2.0",
+//                 method: "evm_increaseTime",
+//                 params: [time],
+//                 id: new Date().getTime(),
+//             },
+//             (err, _) => {
+//                 if (err) {
+//                     return reject(err);
+//                 }
+//                 const newBlockHash = web3.eth.getBlock("latest").hash;
+
+//                 return resolve(newBlockHash);
+//             },
+//         );
+//     });
+// };
+
+
 
 module.exports = async function (deployer, network, accounts) { // eslint-disable-line..
 
@@ -41,6 +63,13 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
 
     await whiteList.addWhitelisted("0xd3956b952a78C7E6C700883924D52CC776F9E4F2", { from: owner });
     await dai.transfer("0xd3956b952a78C7E6C700883924D52CC776F9E4F2", daiFunds, { from: owner });
+
+    // const timeMachine = require('ganache-time-traveler');
+
+    // await timeMachine.advanceTime(45000);
+    // timeMachine.advanceTimeAndBlock(60 * 60 * 6);
+
+    // advanceBlockAtTime(60 * 60 * 6);
 
 
 

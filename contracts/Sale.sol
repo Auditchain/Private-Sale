@@ -8,19 +8,20 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./ReentrancyGuard.sol";
 import "./UniswapPriceOracle.sol";
 import "./WhiteList.sol";
+import "./Vesting.sol";
 
 /**
  * @title Crowdsale
  * @dev Crowdsale is a contract for managing a token crowdsale,
  * allowing investors to purchase tokens with ether or DAI. 
  */
-contract Crowdsale is ReentrancyGuard {
+contract Crowdsale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
 
     
-    IERC20 private _token;                              // The token being sold
+    // IERC20 private _token;                              // The token being soldinstantAmount
     uint256 private _tokensLeft;                        // Amount of tokens in sale contract at given moment    
     UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
@@ -30,7 +31,7 @@ contract Crowdsale is ReentrancyGuard {
     address public DAI;                                 // Address of DAI contract  
     WhiteList public whiteList;                         // Address of white list.
 
-    event TokensPurchased(address indexed beneficiary, uint256 value, uint256 amount);
+    event TokensPurchased(address indexed beneficiary, uint256 eth, uint256 dai, uint256 vestedAmount, uint256 instantAmount );
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
     event FundsForwarded(uint256 eth, uint256 dai);
@@ -49,7 +50,7 @@ contract Crowdsale is ReentrancyGuard {
                  address auditToken, 
                  address DAIAddress,
                  address whitelist,
-                 address admin) {
+                 address admin) Vesting(admin, auditToken) {
         require(oracle != address(0), "Crowdsale: oracle is the zero address");
         require(cWallet != address(0), "Crowdsale: wallet is the zero address");
         require(address(auditToken) != address(0), "Crowdsale: token is the zero address");
@@ -58,7 +59,7 @@ contract Crowdsale is ReentrancyGuard {
         require(admin != address(0), "Crowdsale: Admin is zero address");
       
         _wallet = cWallet;
-        _token = IERC20(auditToken);
+        // _token = IERC20(auditToken);
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
         _operator = admin;
         whiteList = WhiteList(whitelist);
@@ -82,7 +83,7 @@ contract Crowdsale is ReentrancyGuard {
 
         require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
         _token.safeTransferFrom(msg.sender, address(this), amount);
-        _tokensLeft = _tokensLeft.add(amount);
+        _tokensLeft = amount;
         emit TokensDeposited(amount);
     }
     
@@ -92,7 +93,7 @@ contract Crowdsale is ReentrancyGuard {
     function _determineRate() internal view returns (uint256) {
 
         if (_tokensLeft < 5e24)
-             return 150 * 1e15;
+            return 150 * 1e15;
         if (_tokensLeft < 1e25)
             return 125 * 1e15;
         else  
@@ -132,7 +133,7 @@ contract Crowdsale is ReentrancyGuard {
     }
 
      /**
-     * @dev Function to purchase tokens     
+     * @dev Function to purchase tokens. It will be called either with DAI or ETH.    
      * @param DAIAmountContributed Amount of DAI contributed
      */
     function buyTokens(uint256 DAIAmountContributed) public nonReentrant payable {
@@ -153,17 +154,29 @@ contract Crowdsale is ReentrancyGuard {
             IERC20(DAI).safeTransferFrom(msg.sender, address(this), DAIAmountContributed);
         }
 
-        require(getTokenAmount(DAIAmount) <= 1e24, "Crowdsale:buyTokens - You can buy max 1 million AUDT tokens at a time");
-
         uint256 tokens = getTokenAmount(DAIAmount);
+        require(tokens <= 1e24, "Crowdsale:buyTokens - You can buy max 1 million AUDT tokens at a time");
+
         _tokensLeft = _tokensLeft.sub(tokens);
         
         _forwardFunds(DAIAmountContributed);
-        _token.safeTransfer(beneficiary, tokens);
+
+        (uint256 vestedAmount, uint256 instantAmount) = calculateVestingInstantPortion(tokens);
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        tokenHolder.tokensToSend += vestedAmount;
+        _token.safeTransfer(beneficiary, instantAmount);
         
-        emit TokensPurchased(beneficiary, weiAmount, tokens);
+        emit TokensPurchased(beneficiary, weiAmount, DAIAmountContributed, vestedAmount, instantAmount);
 
 
+    }
+
+    function calculateVestingInstantPortion(uint256 amount) private pure returns (uint256, uint256) {
+
+            uint256 vestedAmount = amount.mul(75).div(100);
+            uint256 instantAmount = amount.sub(vestedAmount);
+            return (vestedAmount, instantAmount);
     }
 
     /**
@@ -233,7 +246,7 @@ contract Crowdsale is ReentrancyGuard {
 
     /**
      * @dev Forward funds to wallet. 
-     * @param DAIAmount - amount of DAI if any to be transferred to the campaign wallet
+     * @param DAIAmount - amount of DAI or ETH to be transferred to the campaign wallet
      */
     function _forwardFunds(uint256 DAIAmount) internal {
         if (msg.value > 0)
@@ -248,8 +261,7 @@ contract Crowdsale is ReentrancyGuard {
      * @dev Claim unsold tokens after campaign 
      */
     function claimUnsoldTokens() public isOperator() {
-        uint256 tokensToClaim = _token.balanceOf(address(this));
-        IERC20(_token).safeTransfer(_wallet, tokensToClaim);
-        emit TokensWithdrawn(tokensToClaim);
+        IERC20(_token).safeTransfer(_wallet, _tokensLeft);
+        emit TokensWithdrawn(_tokensLeft);
     }
 }

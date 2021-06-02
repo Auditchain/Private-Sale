@@ -54,7 +54,7 @@ async function init() {
     if (ethereum.selectedAddress != undefined) {
         console.log('MetaMask is installed!');
 
-        getAccount(1);
+        await getAccount(1);
 
         // var interval = setInterval(function () {
         //     loadPortfolio(selectedCapsule).then(function (res, err) {
@@ -68,6 +68,87 @@ async function init() {
         $(".enableEthereumButton").css("display", "block");
         $(".content").css("display", "none");
     }
+}
+
+function claimVestedTokens() {
+
+    return new Promise(async function (resolve, reject) {
+        // let amountToSpend = $("#ether-contribution").val();
+        // amountToSpend = new Decimal(amountToSpend).mul(Math.pow(10, 18));
+
+        // amountToSpend = new BigNumber(amountToSpend);
+        let id = progressAction("Claiming available tokens...", 1, "", false, true);
+
+        saleContract.methods
+            .release()
+            .send({ from: account })
+            .on("receipt", function (receipt) {
+                const event = receipt.events.Released.returnValues;
+                const amount = event.amount;
+
+                progressAction(
+                    "You have successfully claimed: " + new Decimal(amount).dividedBy(Math.pow(10, 18)) + " AUDT tokens",
+                    2,
+                    id,
+                    false,
+                    false
+                );
+                displayVestedData();
+                resolve(receipt);
+            })
+            .on("error", function (error) {
+                progressAction(error.message, 2, id, false, false);
+                reject(error);
+            });
+    });
+
+
+}
+
+
+async function displayVestedData() {
+
+
+    let blockBefore = await web3.eth.getBlock();
+    console.log("blockBefore:", blockBefore.timestamp);
+
+    let tokensAvailable = (await saleContract.methods.vestedAmountAvailable().call({ from: account })) / Math.pow(10, 18);
+
+    $("#vested-tokens-available").html(tokensAvailable.toFixed(2));
+
+    if (tokensAvailable == 0)
+        $('#claim-tokens').prop('disabled', true);
+
+    let holderInfo = (await saleContract.methods.tokenHolders(account).call());
+
+    var allTokensPurchased = holderInfo[0] / Math.pow(10, 18);
+    var allTokensReleased = holderInfo[1] / Math.pow(10, 18);
+    var allTokensLocked = allTokensPurchased - allTokensReleased;
+    $("#all-tokens-purchased").html(allTokensPurchased.toFixed(2));
+    $("#all-tokens-released").html(allTokensReleased.toFixed(2));
+    $("#remaining-tokens").html(allTokensLocked.toFixed(2));
+
+
+
+    let vestedAmountAvailable = await saleContract.methods.vestedAmount(holderInfo[0]).call();
+    console.log(vestedAmountAvailable);
+    // let blockBefore = await web3.eth.getBlock();
+    // console.log("time stamp:", blockBefore.timestamp);
+
+
+    let schedule = await saleContract.methods.returnVestingSchedule().call({ from: account });
+
+
+    $("#vesting-schedule").html("<b>Vesting duration :</b>" + schedule[0] / 3600 + "(Hours) " + (schedule[0] / 86400).toFixed(2) + " days <br>");
+    $("#vesting-schedule").append("<b>Vesting Cliff: </b>" + convertTimestamp(schedule[1]) + "<br>");
+    $("#vesting-schedule").append("<b>Vesting begins </b>" + convertTimestamp(schedule[2]) + "<br>");
+    $("#vesting-schedule").append("<b>Current Time </b>" + convertTimestamp(schedule[2]) + "<br>");
+
+
+
+
+
+
 }
 
 function handleAccountsChanged(accounts) {
@@ -103,8 +184,10 @@ async function getAccount() {
     }).then(function (res, err) {
         return checkWhitelisted();
     }).then(function (isWhitelisted) {
-        if (isWhitelisted)
+        if (isWhitelisted) {
             $('#loading').hide();
+            displayVestedData();
+        }
         else
             $("#noticeModal").modal();
     }).catch(function (res) {
@@ -284,13 +367,16 @@ function buyTokensForDai() {
             .send({ from: account })
             .on("receipt", function (receipt) {
                 const event = receipt.events.TokensPurchased.returnValues;
-                const amount = event.amount;
+                const vestedAmount = new Decimal(event.vestedAmount).dividedBy(Math.pow(10, 18));
+                const instantAmount = new Decimal(event.instantAmount).dividedBy(Math.pow(10, 18));
 
-                // amountToShow = new Decimal(Number(amount.toString())).dividedBy(Math.pow(10, 18));
-                let amountToShow = new Decimal(amount).dividedBy(Math.pow(10, 18))
+                let amountToShow = new Decimal(instantAmount).add(vestedAmount);
+
 
                 progressAction(
-                    "You have successfully purchased: " + amountToShow + " AUDT tokens",
+                    "You have successfully purchased: " + formatNumber(amountToShow) + " AUDT tokens<br>" +
+                    formatNumber(instantAmount) + " AUDT tokens have been delivered to your wallet (25%) and<br>" +
+                    formatNumber(vestedAmount) + " AUDT tokens are vested (75%)",
                     2,
                     id,
                     false,
@@ -321,10 +407,16 @@ function buyTokensForEth() {
             .send({ value: amountToSpend, from: account })
             .on("receipt", function (receipt) {
                 const event = receipt.events.TokensPurchased.returnValues;
-                const amount = event.amount;
+                const vestedAmount = new Decimal(event.vestedAmount).dividedBy(Math.pow(10, 18));
+                const instantAmount = new Decimal(event.instantAmount).dividedBy(Math.pow(10, 18));
+
+                let amountToShow = new Decimal(instantAmount).add(vestedAmount);
+
 
                 progressAction(
-                    "You have successfully purchased: " + new Decimal(amount).dividedBy(Math.pow(10, 18)) + " AUDT tokens",
+                    "You have successfully purchased: " + formatNumber(amountToShow) + " AUDT tokens<br>" +
+                    formatNumber(instantAmount) + " AUDT tokens have been delivered to your wallet (25%) and<br>" +
+                    formatNumber(vestedAmount) + " AUDT tokens are vested (75%)",
                     2,
                     id,
                     false,
@@ -466,6 +558,44 @@ ethereum.on('disconnect', function (error) {
 })
 
 
+function convertTimestamp(timestamp, onlyDate) {
+    var d = new Date(timestamp * 1000), // Convert the passed timestamp to milliseconds
+        yyyy = d.getFullYear(),
+        mm = ('0' + (d.getMonth() + 1)).slice(-2), // Months are zero based. Add leading 0.
+        dd = ('0' + d.getDate()).slice(-2), // Add leading 0.
+        hh = d.getHours(),
+        h = hh,
+        min = ('0' + d.getMinutes()).slice(-2), // Add leading 0.
+        sec = d.getSeconds(),
+        ampm = 'AM',
+        time;
+
+
+    yyyy = ('' + yyyy).slice(-2);
+
+    if (hh > 12) {
+        h = hh - 12;
+        ampm = 'PM';
+    } else if (hh === 12) {
+        h = 12;
+        ampm = 'PM';
+    } else if (hh == 0) {
+        h = 12;
+    }
+
+    if (onlyDate) {
+        time = mm + '/' + dd + '/' + yyyy;
+
+    } else {
+        // ie: 2013-02-18, 8:35 AM	
+        time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
+        time = mm + '/' + dd + '/' + yyyy + '  ' + h + ':' + min + ':' + sec + ' ' + ampm;
+    }
+
+    return time;
+}
+
+
 $(document).ready(function () {
 
 
@@ -550,6 +680,11 @@ $(document).ready(function () {
             console.log(res);
             progressAction(res.message, 2, 2, true, true);
         });
+    });
+
+
+    $("#claim-tokens").click(function () {
+        claimVestedTokens();
     });
 
 })
