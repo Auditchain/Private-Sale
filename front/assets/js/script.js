@@ -138,11 +138,16 @@ async function displayVestedData() {
 
     let schedule = await saleContract.methods.returnVestingSchedule().call({ from: account });
 
+    let stakingRewards = await saleContract.methods.calculateRewardsTotal(account).call();
+    $("#staking-rewards").html((stakingRewards / Math.pow(10, 18)).toFixed(2));
+
 
     $("#vesting-schedule").html("<b>Vesting duration :</b>" + schedule[0] / 3600 + "(Hours) " + (schedule[0] / 86400).toFixed(2) + " days <br>");
     $("#vesting-schedule").append("<b>Vesting Cliff: </b>" + convertTimestamp(schedule[1]) + "<br>");
     $("#vesting-schedule").append("<b>Vesting begins </b>" + convertTimestamp(schedule[2]) + "<br>");
     $("#vesting-schedule").append("<b>Current Time </b>" + convertTimestamp(schedule[2]) + "<br>");
+
+
 
 
 
@@ -494,6 +499,42 @@ function progressAction(msg, stage, id, last, first) {
 }
 
 
+function enterFundingAmount() {
+
+
+    return new Promise(async function (resolve, reject) {
+        let beneficiary = $("#beneficiary").val();
+        let amount = new BigNumber($("#amount").val() * Math.pow(10, 18));
+        let id = progressAction("Funding Member/Early Investor...", 1, "", false, true);
+
+        saleContract.methods
+            .fundUser(beneficiary, amount)
+            .send({ from: account })
+            .on("receipt", function (receipt) {
+                const event = receipt.events.MemberFunded.returnValues;
+                const amount = new Decimal(event.amount).dividedBy(Math.pow(10, 18));
+                const beneficiary = event.beneficiary;
+
+
+
+                progressAction(
+                    "You have successfully funded: " + beneficiary + " with " + formatNumber(amount) + " AUDT tokens.",
+                    2,
+                    id,
+                    false,
+                    false
+                );
+                resolve(receipt);
+            })
+            .on("error", function (error) {
+                progressAction(error.message, 2, id, false, false);
+                reject(error);
+            });
+    });
+
+
+}
+
 Number.prototype.formatMoney = function (c, d, t) {
     var n = this,
         c = isNaN(c = Math.abs(c)) ? 2 : c,
@@ -686,6 +727,13 @@ $(document).ready(function () {
     $("#claim-tokens").click(function () {
         claimVestedTokens();
     });
+
+    $("#fund").click(function () {
+        enterFundingAmount();
+    });
+
+
+
 
 })
 
