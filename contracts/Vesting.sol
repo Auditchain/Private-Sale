@@ -28,6 +28,7 @@ contract Vesting  {
 
     uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
+    uint256 public constant STAKING_RATIO = 10;
     address public admin;
     
 
@@ -55,6 +56,13 @@ contract Vesting  {
     function returnVestingSchedule() external view returns (uint, uint, uint) {
 
         return (duration, cliff, startCountDown);
+    }
+
+    function calculateRewardsTotal(address user) public view returns (uint256) {
+
+        TokenHolder memory tokenHolder = tokenHolders[user];
+        // uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend); 
+        return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(STAKING_RATIO).div(100);
     }
 
     /**
