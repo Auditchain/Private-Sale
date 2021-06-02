@@ -257,6 +257,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
      */
     function claimUnsoldTokens() public isOperator() {
         IERC20(_token).safeTransfer(_wallet, _tokensLeft);
+        _tokensLeft = 0;
         emit TokensWithdrawn(_tokensLeft);
     }
 }
