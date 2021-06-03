@@ -10,20 +10,22 @@ import "./AuditToken.sol";
 // control release of tokens through even time release based on the inputted duration time interval
 contract Vesting  {
     using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+    using SafeERC20 for AuditToken;
 
     struct TokenHolder {     
         uint256 tokensToSend;      // amount of tokens  sent        
         uint256 releasedAmount;    // amount released through vesting schedule
-        bool revoked;           // true if right to continue vesting is revoked
+        bool revoked;              // true if right to continue vesting is revoked
+        bool notStaked;
     }
 
-    event Released(uint256 amount);
+    event VestedPortionReleased(uint256 amount, address user);
+    event StakingRewardsReleased(uint256 amount, address user);
 
     uint256 public cliff;           // time in  when vesting should begin
     uint256 public startCountDown;  // time when countdown starts
     uint256 public duration;        // duration of period in which vesting takes place   
-    IERC20  internal  _token;        // token contract containing tokens
+    AuditToken  internal  _token;        // token contract containing tokens
     mapping(address => TokenHolder) public tokenHolders; //tokenHolder list
 
     uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
@@ -46,23 +48,26 @@ contract Vesting  {
         duration = DURATION;
         startCountDown = block.timestamp;   
         cliff = startCountDown.add(CLIFF);
-        _token = IERC20(_tokenAddress);   
+        _token = AuditToken(_tokenAddress);   
         admin = _admin;     
     }
 
 
 
     // @notice To return vesting schedule 
-    function returnVestingSchedule() external view returns (uint, uint, uint) {
+    function returnVestingSchedule() external view returns (uint, uint, uint, uint) {
 
-        return (duration, cliff, startCountDown);
+        return (duration, cliff, startCountDown, block.timestamp);
     }
 
     function calculateRewardsTotal(address user) public view returns (uint256) {
 
         TokenHolder memory tokenHolder = tokenHolders[user];
         // uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend); 
-        return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(STAKING_RATIO).div(100);
+        if (!tokenHolder.notStaked )
+            return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(STAKING_RATIO).div(100);
+        else 
+            return 0;
     }
 
     /**
@@ -103,15 +108,21 @@ contract Vesting  {
     // @notice Transfers vested available tokens to beneficiary   
     function release() public {
 
-        TokenHolder storage tokenHolder = tokenHolders[msg.sender];        
-        // check if right to vesting is not revoked
-        require(!tokenHolder.revoked);                                   
+        TokenHolder storage tokenHolder = tokenHolders[msg.sender];       
+        require(!tokenHolder.revoked, "Vesting:release - Your vesting has been revoked.");                                   
+        require( tokenHolder.releasedAmount < tokenHolder.tokensToSend, "Vesting:release - You have already claimed all your tokens."); 
+
+        if (startCountDown.add(DURATION) <= block.timestamp)
+            claimStake();
+
         uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend);      
         uint currentTokenToRelease = tokensToRelease - tokenHolder.releasedAmount;
         tokenHolder.releasedAmount += currentTokenToRelease;            
         _token.safeTransfer(msg.sender, currentTokenToRelease);
 
-        emit Released(currentTokenToRelease);
+      
+
+        emit VestedPortionReleased(currentTokenToRelease, msg.sender);
     }
     /**
      * @notice this function will determine vested amount
@@ -128,5 +139,12 @@ contract Vesting  {
         } else {
             return _totalBalance.mul(block.timestamp.sub(startCountDown)) / duration;
         }
+    }
+
+    function claimStake() public {
+        require(startCountDown.add(DURATION) < block.timestamp, "Vesting:claimStake - Stake can be claimed only after vesting expired");
+        uint256 reward = calculateRewardsTotal(msg.sender);
+        _token.mint(msg.sender, reward);
+        StakingRewardsReleased(reward, msg.sender);
     }
 }
