@@ -31,7 +31,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
     event FundsForwarded(uint256 eth, uint256 dai);
-    event MemberFunded(address beneficiary, uint256 amount);
+    event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
 
     /**    
      * @dev constructor
@@ -78,19 +78,20 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     function fundCrowdsale(uint256 amount) public isOperator() {
 
         require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
-        _token.safeTransferFrom(msg.sender, address(this), amount);
+       IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = amount;
         emit TokensDeposited(amount);
     }
 
-    function fundUser(address beneficiary, uint256 amount) public isOperator() {
+    function fundUser(address beneficiary, uint256 amount, bool notStaked) public isOperator() {
 
-       // require(address(beneficiary) != address(0), "Crowdsale:fundUser - beneficiary can't be the zero address");      
-      //  require(amount != 0, "Crowdsale:fundUser Amount can't be 0");
+        require(address(beneficiary) != address(0), "Crowdsale:fundUser - beneficiary can't be the zero address");      
+        require(amount != 0, "Crowdsale:fundUser Amount can't be 0");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += amount;
-      //  emit  MemberFunded(beneficiary, amount);
+        tokenHolder.notStaked = notStaked;
+        emit  MemberFunded(beneficiary, amount, notStaked);
 
     }
     
@@ -172,7 +173,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += vestedAmount;
-        _token.safeTransfer(beneficiary, instantAmount);
+        IERC20(_token).safeTransfer(beneficiary, instantAmount);
         
         emit TokensPurchased(beneficiary, weiAmount, DAIAmountContributed, vestedAmount, instantAmount);
 
