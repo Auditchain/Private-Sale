@@ -82,15 +82,17 @@ function claimVestedTokens() {
             .on("receipt", function (receipt) {
                 const event = receipt.events.VestedPortionReleased.returnValues;
                 const amountVested = event.amount;
+                let event1;
+                let amountStaked;
 
                 if (receipt.events.StakingRewardsReleased != undefined) {
-                    const event1 = receipt.events.StakingRewardsReleased.returnValues;
-                    const amountStaked = event1.amount;
+                    event1 = receipt.events.StakingRewardsReleased.returnValues;
+                    amountStaked = event1.amount;
                 }
 
                 let msg = "You have successfully claimed: " + new Decimal(amountVested).dividedBy(Math.pow(10, 18)) + " AUDT tokens";
-                if (amountStaked > 0)
-                    msg = msg + "<BR>In addition you have received " + new Decimal(amountStaked).dividedBy(Math.pow(10, 18)) + "reward staking AUDT tokens"
+                if (receipt.events.StakingRewardsReleased != undefined)
+                    msg = msg + "<BR>In addition you have received " + new Decimal(amountStaked).dividedBy(Math.pow(10, 18)) + "  staking reward AUDT tokens"
 
                 progressAction(msg, 2, id, false, false);
                 displayVestedData();
@@ -304,7 +306,7 @@ async function claimStake() {
 
     return new Promise(async function (resolve, reject) {
 
-        let id = progressAction("Claiming vested tokens...", 1, "", false, true);
+        let id = progressAction("Claiming staked tokens...", 1, "", false, true);
 
         saleContract.methods
             .claimStake()
