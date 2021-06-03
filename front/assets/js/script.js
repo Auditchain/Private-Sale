@@ -73,26 +73,26 @@ async function init() {
 function claimVestedTokens() {
 
     return new Promise(async function (resolve, reject) {
-        // let amountToSpend = $("#ether-contribution").val();
-        // amountToSpend = new Decimal(amountToSpend).mul(Math.pow(10, 18));
 
-        // amountToSpend = new BigNumber(amountToSpend);
         let id = progressAction("Claiming available tokens...", 1, "", false, true);
 
         saleContract.methods
             .release()
             .send({ from: account })
             .on("receipt", function (receipt) {
-                const event = receipt.events.Released.returnValues;
-                const amount = event.amount;
+                const event = receipt.events.VestedPortionReleased.returnValues;
+                const amountVested = event.amount;
 
-                progressAction(
-                    "You have successfully claimed: " + new Decimal(amount).dividedBy(Math.pow(10, 18)) + " AUDT tokens",
-                    2,
-                    id,
-                    false,
-                    false
-                );
+                if (receipt.events.StakingRewardsReleased != undefined) {
+                    const event1 = receipt.events.StakingRewardsReleased.returnValues;
+                    const amountStaked = event1.amount;
+                }
+
+                let msg = "You have successfully claimed: " + new Decimal(amountVested).dividedBy(Math.pow(10, 18)) + " AUDT tokens";
+                if (amountStaked > 0)
+                    msg = msg + "<BR>In addition you have received " + new Decimal(amountStaked).dividedBy(Math.pow(10, 18)) + "reward staking AUDT tokens"
+
+                progressAction(msg, 2, id, false, false);
                 displayVestedData();
                 resolve(receipt);
             })
@@ -116,8 +116,9 @@ async function displayVestedData() {
 
     $("#vested-tokens-available").html(tokensAvailable.toFixed(2));
 
-    if (tokensAvailable == 0)
-        $('#claim-tokens').prop('disabled', true);
+
+
+
 
     let holderInfo = (await saleContract.methods.tokenHolders(account).call());
 
@@ -127,6 +128,9 @@ async function displayVestedData() {
     $("#all-tokens-purchased").html(allTokensPurchased.toFixed(2));
     $("#all-tokens-released").html(allTokensReleased.toFixed(2));
     $("#remaining-tokens").html(allTokensLocked.toFixed(2));
+
+    let blockNumber = await web3.eth.getBlockNumber();
+    let timeStamp = (await web3.eth.getBlock(blockNumber)).timestamp;
 
 
 
@@ -145,9 +149,19 @@ async function displayVestedData() {
     $("#vesting-schedule").html("<b>Vesting duration :</b>" + schedule[0] / 3600 + "(Hours) " + (schedule[0] / 86400).toFixed(2) + " days <br>");
     $("#vesting-schedule").append("<b>Vesting Cliff: </b>" + convertTimestamp(schedule[1]) + "<br>");
     $("#vesting-schedule").append("<b>Vesting begins </b>" + convertTimestamp(schedule[2]) + "<br>");
-    $("#vesting-schedule").append("<b>Current Time </b>" + convertTimestamp(schedule[2]) + "<br>");
+    $("#vesting-schedule").append("<b>Current Time </b>" + new Date() + "<br>");
 
+    if (tokensAvailable == 0) {
+        $('#claim-tokens').prop('disabled', true);
+        $('#claim-stake').prop('disabled', true);
+    } else {
+        $('#claim-tokens').prop('disabled', false);
 
+        if (Number(schedule[0]) + Number(schedule[2]) < Number(schedule[3]))
+            $('#claim-stake').prop('disabled', false);
+        else
+            $('#claim-stake').prop('disabled', true);
+    }
 
 
 
@@ -187,11 +201,12 @@ async function getAccount() {
     }).then(function (res, err) {
         displayProgress();
     }).then(function (res, err) {
+        displayVestedData();
+    }).then(function (res, err) {
         return checkWhitelisted();
     }).then(function (isWhitelisted) {
         if (isWhitelisted) {
             $('#loading').hide();
-            displayVestedData();
         }
         else
             $("#noticeModal").modal();
@@ -282,6 +297,40 @@ async function loadContracts() {
 
 
     // findCohorts();
+}
+
+
+async function claimStake() {
+
+    return new Promise(async function (resolve, reject) {
+
+        let id = progressAction("Claiming vested tokens...", 1, "", false, true);
+
+        saleContract.methods
+            .claimStake()
+            .send({ from: account })
+            .on("receipt", function (receipt) {
+                const event = receipt.events.StakingRewardsReleased.returnValues;
+                const amount = event.amount;
+
+                progressAction(
+                    "You have successfully claimed staking rewards: " + new Decimal(amount).dividedBy(Math.pow(10, 18)) + " AUDT tokens",
+                    2,
+                    id,
+                    false,
+                    false
+                );
+                displayVestedData();
+                resolve(receipt);
+            })
+            .on("error", function (error) {
+                progressAction(error.message, 2, id, false, false);
+                reject(error);
+            });
+    });
+
+
+
 }
 
 
@@ -505,10 +554,16 @@ function enterFundingAmount() {
     return new Promise(async function (resolve, reject) {
         let beneficiary = $("#beneficiary").val();
         let amount = new BigNumber($("#amount").val() * Math.pow(10, 18));
+        let staking;
+        if ($('#no-stake').is(":checked"))
+            staking = 1;
+        else
+            staking = 0
+
         let id = progressAction("Funding Member/Early Investor...", 1, "", false, true);
 
         saleContract.methods
-            .fundUser(beneficiary, amount)
+            .fundUser(beneficiary, amount, staking)
             .send({ from: account })
             .on("receipt", function (receipt) {
                 const event = receipt.events.MemberFunded.returnValues;
@@ -733,6 +788,9 @@ $(document).ready(function () {
     });
 
 
+    $("#claim-stake").click(function () {
+        claimStake();
+    });
 
 
 })
