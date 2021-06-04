@@ -7,8 +7,8 @@ let buildDir, configDir, account, earningRatio, receipts, stakingTokenSymbol, st
 
 // chainId = "0x4";
 
-let DAIAddress, oracleAddress, whitelistAddress, saleAddress, tokenContract, DAIContract, oracleContract, saleContract, whitelistContract,
-    daiRate, ethRate, tokensLeft;
+let DAIAddress, oracleAddress, whitelistAddress, vestingAddress, saleAddress, tokenContract, DAIContract, oracleContract, saleContract, whitelistContract,
+    vestingContract, daiRate, ethRate, tokensLeft, vestingContractChoice;
 
 
 // chainId = "0x539"
@@ -74,9 +74,9 @@ function claimVestedTokens() {
 
     return new Promise(async function (resolve, reject) {
 
-        let id = progressAction("Claiming available tokens...", 1, "", false, true);
+        let id = progressAction("Claiming available vested tokens...", 1, "", false, true);
 
-        saleContract.methods
+        vestingContractChoice.methods
             .release()
             .send({ from: account })
             .on("receipt", function (receipt) {
@@ -95,7 +95,7 @@ function claimVestedTokens() {
                     msg = msg + "<BR>In addition you have received " + new Decimal(amountStaked).dividedBy(Math.pow(10, 18)) + "  staking reward AUDT tokens"
 
                 progressAction(msg, 2, id, false, false);
-                displayVestedData();
+                displayVestedData(vestingContractChoice);
                 resolve(receipt);
             })
             .on("error", function (error) {
@@ -111,10 +111,13 @@ function claimVestedTokens() {
 async function displayVestedData() {
 
 
+    $("#contract-address").html(vestingContractChoice._address);
+
+
     let blockBefore = await web3.eth.getBlock();
     console.log("blockBefore:", blockBefore.timestamp);
 
-    let tokensAvailable = (await saleContract.methods.vestedAmountAvailable().call({ from: account })) / Math.pow(10, 18);
+    let tokensAvailable = (await vestingContractChoice.methods.vestedAmountAvailable().call({ from: account })) / Math.pow(10, 18);
 
     $("#vested-tokens-available").html(tokensAvailable.toFixed(2));
 
@@ -122,7 +125,7 @@ async function displayVestedData() {
 
 
 
-    let holderInfo = (await saleContract.methods.tokenHolders(account).call());
+    let holderInfo = (await vestingContractChoice.methods.tokenHolders(account).call());
 
     var allTokensPurchased = holderInfo[0] / Math.pow(10, 18);
     var allTokensReleased = holderInfo[1] / Math.pow(10, 18);
@@ -136,15 +139,15 @@ async function displayVestedData() {
 
 
 
-    let vestedAmountAvailable = await saleContract.methods.vestedAmount(holderInfo[0]).call();
+    let vestedAmountAvailable = await vestingContractChoice.methods.vestedAmount(holderInfo[0]).call();
     console.log(vestedAmountAvailable);
     // let blockBefore = await web3.eth.getBlock();
     // console.log("time stamp:", blockBefore.timestamp);
 
 
-    let schedule = await saleContract.methods.returnVestingSchedule().call({ from: account });
+    let schedule = await vestingContractChoice.methods.returnVestingSchedule().call({ from: account });
 
-    let stakingRewards = await saleContract.methods.calculateRewardsTotal(account).call();
+    let stakingRewards = await vestingContractChoice.methods.calculateRewardsTotal(account).call();
     $("#staking-rewards").html((stakingRewards / Math.pow(10, 18)).toFixed(2));
 
 
@@ -164,10 +167,6 @@ async function displayVestedData() {
         else
             $('#claim-stake').prop('disabled', true);
     }
-
-
-
-
 
 
 }
@@ -203,6 +202,14 @@ async function getAccount() {
     }).then(function (res, err) {
         displayProgress();
     }).then(function (res, err) {
+
+
+        var type = location.search.split('x=')[1];
+        if (type == "s")
+            vestingContractChoice = saleContract;
+        else if (type = "e")
+            vestingContractChoice = vestingContract;
+
         displayVestedData();
     }).then(function (res, err) {
         return checkWhitelisted();
@@ -267,13 +274,14 @@ async function loadContracts() {
     let res = await loadConfig("contracts.json");
 
     let actual_JSON = JSON.parse(res);
-    const { AUDT_TOKEN_ADDRESS, DAI_ADDRESS, ORACLE_ADDRESS, WHITELIST_ADDRESS, SALE_ADDRESS } = actual_JSON;
+    const { AUDT_TOKEN_ADDRESS, DAI_ADDRESS, ORACLE_ADDRESS, WHITELIST_ADDRESS, SALE_ADDRESS, VESTING_ADDRESS } = actual_JSON;
 
     tokenAddress = AUDT_TOKEN_ADDRESS;
     DAIAddress = DAI_ADDRESS;
     oracleAddress = ORACLE_ADDRESS;
     whitelistAddress = WHITELIST_ADDRESS;
     saleAddress = SALE_ADDRESS;
+    vestingAddress = VESTING_ADDRESS;
 
 
     res = await loadJSON("AuditToken.json");
@@ -296,7 +304,9 @@ async function loadContracts() {
     actual_JSON = JSON.parse(res);
     saleContract = new web3.eth.Contract(actual_JSON["abi"], saleAddress);
 
-
+    res = await loadJSON("Vesting.json");
+    actual_JSON = JSON.parse(res);
+    vestingContract = new web3.eth.Contract(actual_JSON["abi"], vestingAddress);
 
     // findCohorts();
 }
@@ -308,7 +318,7 @@ async function claimStake() {
 
         let id = progressAction("Claiming staked tokens...", 1, "", false, true);
 
-        saleContract.methods
+        vestingContractChoice.methods
             .claimStake()
             .send({ from: account })
             .on("receipt", function (receipt) {
@@ -322,7 +332,7 @@ async function claimStake() {
                     false,
                     false
                 );
-                displayVestedData();
+                displayVestedData(vestingContractChoice);
                 resolve(receipt);
             })
             .on("error", function (error) {
@@ -564,7 +574,7 @@ function enterFundingAmount() {
 
         let id = progressAction("Funding Member/Early Investor...", 1, "", false, true);
 
-        saleContract.methods
+        vestingContractChoice.methods
             .fundUser(beneficiary, amount, staking)
             .send({ from: account })
             .on("receipt", function (receipt) {
@@ -784,6 +794,7 @@ $(document).ready(function () {
     $("#claim-tokens").click(function () {
         claimVestedTokens();
     });
+
 
     $("#fund").click(function () {
         enterFundingAmount();

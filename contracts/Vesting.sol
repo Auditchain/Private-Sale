@@ -21,16 +21,18 @@ contract Vesting  {
 
     event VestedPortionReleased(uint256 amount, address user);
     event StakingRewardsReleased(uint256 amount, address user);
+    event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
 
     uint256 public cliff;           // time in  when vesting should begin
     uint256 public startCountDown;  // time when countdown starts
     uint256 public duration;        // duration of period in which vesting takes place   
     AuditToken  internal  _token;        // token contract containing tokens
     mapping(address => TokenHolder) public tokenHolders; //tokenHolder list
+    uint256 public stakingRatio;
 
     uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
-    uint256 public constant STAKING_RATIO = 10;
+    // uint256 public constant STAKING_RATIO = 50;
     address public admin;
     
 
@@ -41,18 +43,29 @@ contract Vesting  {
      */
     
      constructor (address _admin,
-                 address _tokenAddress) {
+                 address _tokenAddress,
+                 uint256 _stakingRatio) {
        
-        require(_tokenAddress != address(0));
-        require(_admin != address(0));
+        require(_tokenAddress != address(0), "Vesting:constructor - token address can't be 0");
+        require(_admin != address(0), "Vesting:constructor - admin address can't be 0");
+        require(_stakingRatio !=0, "Vesting:constructor - staking ratio can't be 0");
+
         duration = DURATION;
         startCountDown = block.timestamp;   
         cliff = startCountDown.add(CLIFF);
         _token = AuditToken(_tokenAddress);   
         admin = _admin;     
+        stakingRatio = _stakingRatio;
     }
 
+       /**
+    * @dev to check if user is authorized to do admin actions
+     */
+    modifier isOperator {
+            require(msg.sender == admin, "Sale:isOperator - Caller is not an operator");
 
+        _;
+    }
 
     // @notice To return vesting schedule 
     function returnVestingSchedule() external view returns (uint, uint, uint, uint) {
@@ -65,9 +78,21 @@ contract Vesting  {
         TokenHolder memory tokenHolder = tokenHolders[user];
         // uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend); 
         if (!tokenHolder.notStaked )
-            return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(STAKING_RATIO).div(100);
+            return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(stakingRatio).div(100);
         else 
             return 0;
+    }
+
+    function fundUser(address beneficiary, uint256 amount, bool notStaked) public isOperator() {
+
+        require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
+        require(amount != 0, "Staking:fundUser Amount can't be 0");
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        tokenHolder.tokensToSend += amount;
+        tokenHolder.notStaked = notStaked;
+        emit  MemberFunded(beneficiary, amount, notStaked);
+
     }
 
     /**

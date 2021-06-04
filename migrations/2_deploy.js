@@ -3,6 +3,7 @@ const TOKEN = artifacts.require('../AuditToken');
 const ORACLE = artifacts.require('../UniswapPriceOracle');
 const SALE = artifacts.require('../Crowdsale');
 const WHITELIST = artifacts.require('../WhiteList');
+const VESTING = artifacts.require('../Vesting')
 
 
 // const advanceBlockAtTime = (time) => {
@@ -35,6 +36,8 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     const platformAccount = accounts[2];
     let fundingAmount = "15000000000000000000000000";
     let daiFunds = "300000000000000000000000"
+    let stakingRatioSale = 10;
+    let stakingRatioFund = 50;
 
 
 
@@ -51,8 +54,11 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     await deployer.deploy(WHITELIST);
     let whiteList = await WHITELIST.deployed();
 
-    await deployer.deploy(SALE, oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner);
+    await deployer.deploy(SALE, oracle.address, platformAccount, token.address, dai.address, whiteList.address, owner, stakingRatioSale);
     let sale = await SALE.deployed();
+
+    await deployer.deploy(VESTING, owner, token.address, stakingRatioFund);
+    let vesting = await VESTING.deployed();
 
 
     await token.approve(sale.address, fundingAmount, { from: owner })
@@ -60,6 +66,7 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
     await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
     await token.grantRole(CONTROLLER_ROLE, sale.address, { from: owner });
+    await token.grantRole(CONTROLLER_ROLE, vesting.address, { from: owner });
     await dai.transfer(holder1, daiFunds, { from: owner });
 
     await whiteList.addWhitelisted("0xd3956b952a78C7E6C700883924D52CC776F9E4F2", { from: owner });
@@ -78,6 +85,8 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     console.log('"DAI_ADDRESS":"' + dai.address + '",');
     console.log('"ORACLE_ADDRESS":"' + oracle.address + '",');
     console.log('"WHITELIST_ADDRESS":"' + whiteList.address + '",');
-    console.log('"SALE_ADDRESS":"' + sale.address + '"' + "\n\n");
+    console.log('"SALE_ADDRESS":"' + sale.address + '"' + ",");
+    console.log('"VESTING_ADDRESS":"' + vesting.address + '"' + "\n\n");
+
 
 }

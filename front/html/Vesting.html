@@ -33,6 +33,8 @@
                         <div class="table-responsive table-sales">
 
                             <div class="card-content table-responsive">
+                                <h5>Contract Address</h5>
+                                <div id="contract-address"></div>
                                 <h5>Vesting Schedule</h5>
                                 <div id="vesting-schedule"></div>
                                 <hr>
@@ -113,8 +115,10 @@
     <script type="text/javascript">
         async function autorun() {
 
-            var x = location.search.split('x=')[1];
-            $.cookie("ico", x);
+
+
+            // var x = location.search.split('x=')[1];
+            // $.cookie("ico", x);
             await init();
             // await displayWidgetVestedData();
 
