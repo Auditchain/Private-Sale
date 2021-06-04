@@ -31,7 +31,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     event TokensDeposited(uint256 amount);
     event TokensWithdrawn(uint256 amount);
     event FundsForwarded(uint256 eth, uint256 dai);
-    event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
+   
 
     /**    
      * @dev constructor
@@ -47,7 +47,8 @@ contract Crowdsale is Vesting, ReentrancyGuard {
                  address auditToken, 
                  address DAIAddress,
                  address whitelist,
-                 address admin) Vesting(admin, auditToken) {
+                 address admin, 
+                 uint256 stakingRatio) Vesting(admin, auditToken, stakingRatio) {
         require(oracle != address(0), "Crowdsale: oracle is the zero address");
         require(cWallet != address(0), "Crowdsale: wallet is the zero address");
         require(address(auditToken) != address(0), "Crowdsale: token is the zero address");
@@ -57,19 +58,19 @@ contract Crowdsale is Vesting, ReentrancyGuard {
       
         _wallet = cWallet;
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
-        _operator = admin;
+        // _operator = admin;
         whiteList = WhiteList(whitelist);
         DAI = DAIAddress;
     }
 
-    /**
-    * @dev to check if user is authorized to do admin actions
-     */
-    modifier isOperator {
-            require(msg.sender == _operator, "Sale:isOperator - Caller is not an operator");
+    // /**
+    // * @dev to check if user is authorized to do admin actions
+    //  */
+    // modifier isOperator {
+    //         require(msg.sender == _operator, "Sale:isOperator - Caller is not an operator");
 
-        _;
-    }
+    //     _;
+    // }
 
      /**
      * @dev Fund crowdsale with tokens.
@@ -83,17 +84,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
         emit TokensDeposited(amount);
     }
 
-    function fundUser(address beneficiary, uint256 amount, bool notStaked) public isOperator() {
 
-        require(address(beneficiary) != address(0), "Crowdsale:fundUser - beneficiary can't be the zero address");      
-        require(amount != 0, "Crowdsale:fundUser Amount can't be 0");
-
-        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
-        tokenHolder.tokensToSend += amount;
-        tokenHolder.notStaked = notStaked;
-        emit  MemberFunded(beneficiary, amount, notStaked);
-
-    }
     
     /**
     * @dev determine rate of sale based on amount of tokens available in contract
