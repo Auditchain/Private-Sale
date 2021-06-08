@@ -22,6 +22,9 @@ contract Vesting  {
     event VestedPortionReleased(uint256 amount, address user);
     event StakingRewardsReleased(uint256 amount, address user);
     event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
+    event VestingFunded(uint256 amount);
+    event Revoke(address user);
+    event Reinstate(address user);
 
     uint256 public cliff;           // time in  when vesting should begin
     uint256 public startCountDown;  // time when countdown starts
@@ -34,6 +37,8 @@ contract Vesting  {
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
     // uint256 public constant STAKING_RATIO = 50;
     address public admin;
+    uint256 public totalRedeemable;
+    bool public fundingCompleted;
     
 
     /**
@@ -87,11 +92,13 @@ contract Vesting  {
 
         require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
         require(amount != 0, "Staking:fundUser Amount can't be 0");
+        require(!fundingCompleted, "Vesting:fundUser - Funding has been already completed.");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += amount;
         tokenHolder.notStaked = notStaked;
-        emit  MemberFunded(beneficiary, amount, notStaked);
+        totalRedeemable = totalRedeemable.add(amount);
+        emit MemberFunded(beneficiary, amount, notStaked);
 
     }
 
@@ -100,22 +107,24 @@ contract Vesting  {
     * @param _user {address} of user to revoke their right to vesting    
     */
     
-    function revoke(address _user) public {
+    function revoke(address _user) public isOperator(){
 
         require(msg.sender == admin, "Vesting:revoke - You are not authorized to call this function.");
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
+        emit Revoke(_user);
     }
 
     /**
     * @dev owner can reinstate access to continue vesting of tokens
     * @param _user {address} of user to reinstate their right to vesting    
     */
-    function reinstate(address _user) public {
+    function reinstate(address _user) public isOperator(){
 
         require(msg.sender == admin, "Vesting:reinstate - You are not authorized to call this function.");
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = false; 
+        emit Reinstate(_user);
     }
 
     /**
@@ -135,12 +144,13 @@ contract Vesting  {
 
         TokenHolder storage tokenHolder = tokenHolders[msg.sender];       
         require(!tokenHolder.revoked, "Vesting:release - Your vesting has been revoked.");                                   
-        require( tokenHolder.releasedAmount < tokenHolder.tokensToSend, "Vesting:release - You have already claimed all your tokens."); 
+        require( tokenHolder.releasedAmount <= tokenHolder.tokensToSend, "Vesting:release - You have already claimed all your tokens."); 
 
-        if (startCountDown.add(DURATION) <= block.timestamp)
+        if (startCountDown.add(DURATION) < block.timestamp)
             claimStake();
 
-        uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend);      
+        uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend);     
+        require(tokensToRelease > 0, "Vesting:release - Cliff is still in effect" ); 
         uint currentTokenToRelease = tokensToRelease - tokenHolder.releasedAmount;
         tokenHolder.releasedAmount += currentTokenToRelease;            
         _token.safeTransfer(msg.sender, currentTokenToRelease);
@@ -166,10 +176,22 @@ contract Vesting  {
         }
     }
 
-    function claimStake() public {
+    function claimStake() internal {
         require(startCountDown.add(DURATION) < block.timestamp, "Vesting:claimStake - Stake can be claimed only after vesting expired");
         uint256 reward = calculateRewardsTotal(msg.sender);
         _token.mint(msg.sender, reward);
         StakingRewardsReleased(reward, msg.sender);
+    }
+
+     /**
+     * @dev Fund vesting with tokens. Only used in stand alone version of vesting. 
+     * @param amount - amount of tokens sent to vesting contract
+     */
+    function fundVesting(uint256 amount) public isOperator() {
+
+        require(amount == totalRedeemable, "Vesting:fundVesting - Amount of funding has to be equal to vested tokens.");
+        fundingCompleted = true;
+        _token.safeTransferFrom(msg.sender, address(this), amount);       
+        emit VestingFunded(amount);
     }
 }

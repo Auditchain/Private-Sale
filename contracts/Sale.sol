@@ -51,26 +51,14 @@ contract Crowdsale is Vesting, ReentrancyGuard {
                  uint256 stakingRatio) Vesting(admin, auditToken, stakingRatio) {
         require(oracle != address(0), "Crowdsale: oracle is the zero address");
         require(cWallet != address(0), "Crowdsale: wallet is the zero address");
-        require(address(auditToken) != address(0), "Crowdsale: token is the zero address");
         require(DAIAddress != address(0), "Crowdsale: DAI is zero address");
         require(whitelist != address(0), "Crowdsale: Whitelist is zero address");
-        require(admin != address(0), "Crowdsale: Admin is zero address");
       
         _wallet = cWallet;
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
-        // _operator = admin;
         whiteList = WhiteList(whitelist);
         DAI = DAIAddress;
     }
-
-    // /**
-    // * @dev to check if user is authorized to do admin actions
-    //  */
-    // modifier isOperator {
-    //         require(msg.sender == _operator, "Sale:isOperator - Caller is not an operator");
-
-    //     _;
-    // }
 
      /**
      * @dev Fund crowdsale with tokens.

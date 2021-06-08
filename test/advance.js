@@ -28,7 +28,7 @@ const advanceBlockAtTime = (time) => {
 
 async function test() {
 
-    await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 340);
+    await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 370);
 }
 
 test();
