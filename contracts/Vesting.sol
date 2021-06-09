@@ -104,6 +104,7 @@ contract Vesting  {
         require(!fundingCompleted, "Vesting:fundUser - Funding has been already completed.");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        require(tokenHolder.notStaked, "Vesting:fundUser - User has been already marked as not earning rewards" );
         tokenHolder.tokensToSend += amount;
         tokenHolder.notStaked = notStaked;
         totalRedeemable = totalRedeemable.add(amount);
