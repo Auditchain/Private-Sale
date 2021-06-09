@@ -78,16 +78,25 @@ contract Vesting  {
         return (duration, cliff, startCountDown, block.timestamp);
     }
 
+    /** @dev calculates rewards based on released amount
+     *  @param user - user whose rewards are being calculated
+     *  @return amount of tokens for reward. Excludes team members who are not part of reward program.
+     */
     function calculateRewardsTotal(address user) public view returns (uint256) {
 
         TokenHolder memory tokenHolder = tokenHolders[user];
-        // uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend); 
         if (!tokenHolder.notStaked )
             return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(stakingRatio).div(100);
         else 
             return 0;
     }
 
+    /**
+     * @dev allocate tokens to early investor or team member
+     * @param beneficiary - user who gets tokens allocated
+     * @param amount - amount of tokens being allocated
+     * @param notStaked - flag if user is eligible for vesting rewards 
+     */
     function fundUser(address beneficiary, uint256 amount, bool notStaked) public isOperator() {
 
         require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
@@ -176,6 +185,9 @@ contract Vesting  {
         }
     }
 
+    /**
+     * @dev to release vesting rewards
+     */
     function claimStake() internal {
         require(startCountDown.add(DURATION) < block.timestamp, "Vesting:claimStake - Stake can be claimed only after vesting expired");
         uint256 reward = calculateRewardsTotal(msg.sender);
