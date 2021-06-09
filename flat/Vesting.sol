@@ -1655,7 +1655,7 @@ contract AuditToken is Locked, ERC20, Pausable, ERC20Burnable{
 
 
 
-// @note this contract can be inherited by Crowdsale and TeamAllocation contracts and
+// @note this contract can be inherited by Sale contract 
 // control release of tokens through even time release based on the inputted duration time interval
 contract Vesting  {
     using SafeMath for uint256;

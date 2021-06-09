@@ -22,33 +22,15 @@ function getPathForDAItoEth() private view returns (address[] memory) {
     return path;
 }
 
-function getEstimatedDAIForEth(uint ethAmount) public pure returns (uint256[] memory)
- {
-//     // return uniswapRouter.getAmountsIn(ethAmount, getPathForDAItoEth());
+function getEstimatedDAIForEth(uint ethAmount) public view returns (uint256[] memory)
+  {
+    return uniswapRouter.getAmountsIn(ethAmount, getPathForDAItoEth());
 
-    
+    // Used for local testing
+    // uint256[] memory retValue = new uint256[](2);
+    // retValue[0] = 3000000000000000000000 * ethAmount / 1e18 ;
+    // retValue[1] = 1000000000000000000;
+    // return retValue;
+  }
 
-    uint256[] memory retValue = new uint256[](2);
-
-    retValue[0] = 3000000000000000000000 * ethAmount / 1e18 ;
-    retValue[1] = 1000000000000000000;
-
-    return retValue;
-}
-
-
-//   function convertDaiToEth(uint ethAmount) public payable {
-//     uint deadline = block.timestamp + 15; // using 'now' for convenience, for mainnet pass deadline from frontend!
-//    uniswapRouter.swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-//   }
-
-
-
-//   function convertEthToDai(uint daiAmount) public payable {
-//     uint deadline = block.timestamp + 15; // using 'now' for convenience, for mainnet pass deadline from frontend!
-//     uniswapRouter.swapETHForExactTokens{ value: msg.value }(daiAmount, getPathForETHtoDAI(), address(this), deadline);
-//     // refund leftover ETH to user
-//     (bool success,) = msg.sender.call{ value: address(this).balance }("");
-//     require(success, "refund failed");
-//   }
 }
