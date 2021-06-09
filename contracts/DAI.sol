@@ -12,7 +12,7 @@ contract DAI is ERC20{
     
     /// @dev Constructor that gives an account all initial tokens.
     constructor(address account) ERC20("Stable Token", "DAI") {
-        require(account != address(0), "Crowdsale:constructor - Address can't be 0");
+        require(account != address(0), "DAI:constructor - Address can't be 0");
         _mint(account, INITIAL_SUPPLY);              
     }
 

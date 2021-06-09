@@ -10,11 +10,11 @@ import "./WhiteList.sol";
 import "./Vesting.sol";
 
 /**
- * @title Crowdsale
- * @dev Crowdsale is a contract for managing a token crowdsale,
+ * @title Sale
+ * @dev Sale is a contract for managing a token sale,
  * allowing investors to purchase tokens with ether or DAI. 
  */
-contract Crowdsale is Vesting, ReentrancyGuard {
+contract Sale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
@@ -49,10 +49,10 @@ contract Crowdsale is Vesting, ReentrancyGuard {
                  address whitelist,
                  address admin, 
                  uint256 stakingRatio) Vesting(admin, auditToken, stakingRatio) {
-        require(oracle != address(0), "Crowdsale: oracle is the zero address");
-        require(cWallet != address(0), "Crowdsale: wallet is the zero address");
-        require(DAIAddress != address(0), "Crowdsale: DAI is zero address");
-        require(whitelist != address(0), "Crowdsale: Whitelist is zero address");
+        require(oracle != address(0), "Sale: oracle is the zero address");
+        require(cWallet != address(0), "Sale: wallet is the zero address");
+        require(DAIAddress != address(0), "Sale: DAI is zero address");
+        require(whitelist != address(0), "Sale: Whitelist is zero address");
       
         _wallet = cWallet;
         _uniswapPriceOracle = UniswapPriceOracle(oracle);
@@ -61,12 +61,12 @@ contract Crowdsale is Vesting, ReentrancyGuard {
     }
 
      /**
-     * @dev Fund crowdsale with tokens.
-     * @param amount - amount of tokens sent to crowdsale for sale
+     * @dev Fund Sale with tokens.
+     * @param amount - amount of tokens sent to Sale for sale
      */
-    function fundCrowdsale(uint256 amount) public isOperator() {
+    function fundSale(uint256 amount) public isOperator() {
 
-        require(amount == 15e24, "Crowdsale:fundCrowdsale - Amount of funding has to be 15,000,000 AUDT");
+        require(amount == 15e24, "Sale:fundSale - Amount of funding has to be 15,000,000 AUDT");
        IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
         _tokensLeft = amount;
         emit TokensDeposited(amount);
@@ -130,7 +130,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
         address beneficiary = msg.sender;
 
         _preValidatePurchase(beneficiary, weiAmount, DAIAmountContributed);
-        require(whiteList.isWhitelisted(beneficiary), "Crowdsale:buyTokens - User is not whitelisted");
+        require(whiteList.isWhitelisted(beneficiary), "Sale:buyTokens - User is not whitelisted");
 
         if (msg.value > 0) {
             DAIAmount =  calculateDAIForEther(msg.value);
@@ -142,7 +142,7 @@ contract Crowdsale is Vesting, ReentrancyGuard {
         }
 
         uint256 tokens = getTokenAmount(DAIAmount);
-        require(tokens <= 1e24, "Crowdsale:buyTokens - You can buy max 1 million AUDT tokens at a time");
+        require(tokens <= 1e24, "Sale:buyTokens - You can buy max 1 million AUDT tokens at a time");
 
         _tokensLeft = _tokensLeft.sub(tokens);
         
@@ -226,8 +226,8 @@ contract Crowdsale is Vesting, ReentrancyGuard {
      * @param DAIAmount value of DAI involved in the purchase
      */
     function _preValidatePurchase(address beneficiary, uint256 weiAmount, uint256 DAIAmount) internal pure {
-        require(beneficiary != address(0), "Crowdsale: beneficiary is the zero address");
-        require(weiAmount != 0 || DAIAmount != 0, "Crowdsale: Both weiAmount and DAIAmount  can't be  0");
+        require(beneficiary != address(0), "Sale: beneficiary is the zero address");
+        require(weiAmount != 0 || DAIAmount != 0, "Sale: Both weiAmount and DAIAmount  can't be  0");
         
     }
 

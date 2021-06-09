@@ -7,7 +7,7 @@ import {
 const DAI = artifacts.require('../DAI');
 const TOKEN = artifacts.require('../AuditToken');
 const ORACLE = artifacts.require('../UniswapPriceOracle');
-const SALE = artifacts.require('../Crowdsale');
+const SALE = artifacts.require('../Sale');
 const WHITELIST = artifacts.require('../WhiteList');
 
 var BN = web3.utils.BN;
@@ -47,7 +47,7 @@ contract("Sale contract", (accounts) => {
 
         sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
         await token.approve(sale.address, fundingAmount, { from: owner })
-        await sale.fundCrowdsale(fundingAmount, { from: owner });
+        await sale.fundSale(fundingAmount, { from: owner });
         let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
         await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
         await dai.transfer(holder1, daiFunds, { from: owner });
@@ -60,7 +60,7 @@ contract("Sale contract", (accounts) => {
 
             sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
             await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundCrowdsale(fundingAmount, { from: owner });
+            await sale.fundSale(fundingAmount, { from: owner });
 
             let tokenInSale = await token.balanceOf(sale.address);
             assert.strictEqual(tokenInSale.toString(), fundingAmount);
@@ -424,7 +424,7 @@ contract("Sale contract", (accounts) => {
 
             sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
             await token.approve(sale.address, fundingAmount, { from: owner })
-            let result = await sale.fundCrowdsale(fundingAmount, { from: owner });
+            let result = await sale.fundSale(fundingAmount, { from: owner });
 
             assert.lengthOf(result.logs, 1);
             let event = result.logs[0];

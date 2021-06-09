@@ -300,7 +300,7 @@ async function loadContracts() {
     actual_JSON = JSON.parse(res);
     whitelistContract = new web3.eth.Contract(actual_JSON["abi"], whitelistAddress);
 
-    res = await loadJSON("Crowdsale.json");
+    res = await loadJSON("Sale.json");
     actual_JSON = JSON.parse(res);
     saleContract = new web3.eth.Contract(actual_JSON["abi"], saleAddress);
 

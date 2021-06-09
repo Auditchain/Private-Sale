@@ -1,7 +1,7 @@
 const DAI = artifacts.require('../DAI');
 const TOKEN = artifacts.require('../AuditToken');
 const ORACLE = artifacts.require('../UniswapPriceOracle');
-const SALE = artifacts.require('../Crowdsale');
+const SALE = artifacts.require('../Sale');
 const WHITELIST = artifacts.require('../WhiteList');
 const VESTING = artifacts.require('../Vesting')
 
@@ -62,7 +62,7 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
 
 
     await token.approve(sale.address, fundingAmount, { from: owner })
-    await sale.fundCrowdsale(fundingAmount, { from: owner });
+    await sale.fundSale(fundingAmount, { from: owner });
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
     await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
     await token.grantRole(CONTROLLER_ROLE, sale.address, { from: owner });
