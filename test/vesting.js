@@ -63,7 +63,11 @@ contract("Sale contract", (accounts) => {
 
         it("Should succeed. Operator has funded contract with appropriate amount.", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+
+            let gas = await vesting.fundUserMultiple.estimateGas([holder1, holder2, operator, holder1, holder2, operator, holder1, holder2, operator], [fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount], [1, 1, 1, 1, 1, 1, 1, 1, 1], { from: operator });
+            console.log("gas:", gas);
+
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             let result = await vesting.fundVesting(fundAmount, { from: operator });
             assert.lengthOf(result.logs, 1);
@@ -73,7 +77,7 @@ contract("Sale contract", (accounts) => {
 
         it("Should fail. Operator is not authorized.", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
 
             try {
@@ -86,7 +90,7 @@ contract("Sale contract", (accounts) => {
 
         it("Should fail. Operator funded wrong amount.", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
 
             try {
@@ -102,7 +106,7 @@ contract("Sale contract", (accounts) => {
 
         it("Should succeed. User has been allocated vesting tokens by authorized member.", async () => {
 
-            let result = await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             assert.lengthOf(result.logs, 1);
             let event = result.logs[0];
             assert.equal(event.event, 'MemberFunded');
@@ -119,7 +123,7 @@ contract("Sale contract", (accounts) => {
 
             try {
 
-                let result = await vesting.fundUser(holder1, fundAmount, 0, { from: owner });
+                let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: owner });
             } catch (error) {
 
                 ensureException(error);
@@ -128,14 +132,14 @@ contract("Sale contract", (accounts) => {
 
         it("Should fail. Attempt to allocate tokens to a user after contract has been funded. ", async () => {
 
-            await vesting.fundUser(holder2, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder2], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
 
             try {
 
-                await vesting.fundUser(holder1, fundAmount, 0, { from: owner });
+                await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: owner });
             } catch (error) {
 
                 ensureException(error);
@@ -151,7 +155,7 @@ contract("Sale contract", (accounts) => {
         beforeEach(async () => {
             let snapshot = await timeMachine.takeSnapshot();
             snapshotId = snapshot['result'];
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
@@ -281,7 +285,7 @@ contract("Sale contract", (accounts) => {
     describe("Revoke Vesting", async () => {
         it("Should fail. User whose rights are revoked can't claim vesting amount", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
@@ -299,7 +303,7 @@ contract("Sale contract", (accounts) => {
 
         it("Should fail. User without operator access attempts to revoke rights of other user.", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
@@ -321,7 +325,7 @@ contract("Sale contract", (accounts) => {
 
             await token.grantRole(CONTROLLER_ROLE, vesting.address, { from: operator });
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
@@ -342,7 +346,7 @@ contract("Sale contract", (accounts) => {
 
         it("Should fail. User without operator access attempts to reinstate rights to vest.", async () => {
 
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
@@ -387,7 +391,7 @@ contract("Sale contract", (accounts) => {
 
         it('should log VestingFunded after fundVesting', async () => {
 
-            let result = await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             assert.lengthOf(result.logs, 1);
             let event = result.logs[0];
@@ -397,7 +401,7 @@ contract("Sale contract", (accounts) => {
 
         it('should log MemberFunded after fundUser', async () => {
 
-            let result = await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             assert.lengthOf(result.logs, 1);
             let event = result.logs[0];
@@ -407,7 +411,7 @@ contract("Sale contract", (accounts) => {
 
         it('should log MemberFunded after fundUser', async () => {
 
-            let result = await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
 
             assert.lengthOf(result.logs, 1);
             let event = result.logs[0];
@@ -419,7 +423,7 @@ contract("Sale contract", (accounts) => {
 
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
             await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 367);
 
@@ -446,7 +450,7 @@ contract("Sale contract", (accounts) => {
 
 
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
-            await vesting.fundUser(holder1, fundAmount, 0, { from: operator });
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await vesting.fundVesting(fundAmount, { from: operator });
             await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 60);
             await token.grantRole(CONTROLLER_ROLE, vesting.address, { from: operator });
