@@ -97,7 +97,7 @@ contract Vesting  {
      * @param amount - amount of tokens being allocated
      * @param notStaked - flag if user is eligible for vesting rewards 
      */
-    function fundUser(address beneficiary, uint256 amount, bool notStaked) public isOperator() {
+    function fundUser(address beneficiary, uint256 amount, bool notStaked) internal {
 
         require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
         require(amount != 0, "Staking:fundUser Amount can't be 0");
@@ -110,6 +110,22 @@ contract Vesting  {
         emit MemberFunded(beneficiary, amount, notStaked);
 
     }
+
+    /**
+     * @dev allocate tokens to early investor or team member in a batch
+     * @param beneficiary - users who gets tokens allocated
+     * @param amount - amounts of tokens being allocated
+     * @param notStaked - flags if user is eligible for vesting rewards 
+     */
+    function fundUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isOperator() {
+
+        uint256 length = beneficiary.length;
+        require(length <= 346, "Vesting-fundUserMultiple: List too long");  
+        for (uint256 i = 0; i < length; i++) {
+            fundUser(beneficiary[i], amount[i], notStaked[i]);
+        }
+    }
+   
 
     /**
     * @dev owner can revoke access to continue vesting of tokens
