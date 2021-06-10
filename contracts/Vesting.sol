@@ -217,7 +217,7 @@ contract Vesting  {
      */
     function fundVesting(uint256 amount) public isOperator() {
 
-        require(amount == totalRedeemable, "Vesting:fundVesting - Amount of funding has to be equal to vested tokens.");
+        require(amount == totalRedeemable, "Vesting:fundVesting - Amount of funding has to be equal to vested tokens in the contract.");
         fundingCompleted = true;
         _token.safeTransferFrom(msg.sender, address(this), amount);       
         emit VestingFunded(amount);
