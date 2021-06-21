@@ -22,15 +22,15 @@ function getPathForDAItoEth() private view returns (address[] memory) {
     return path;
 }
 
-function getEstimatedDAIForEth(uint ethAmount) public view returns (uint256[] memory)
+function getEstimatedDAIForEth(uint ethAmount) public pure returns (uint256[] memory)
   {
-    return uniswapRouter.getAmountsIn(ethAmount, getPathForDAItoEth());
+    // return uniswapRouter.getAmountsIn(ethAmount, getPathForDAItoEth());
 
     // Used for local testing
-    // uint256[] memory retValue = new uint256[](2);
-    // retValue[0] = 3000000000000000000000 * ethAmount / 1e18 ;
-    // retValue[1] = 1000000000000000000;
-    // return retValue;
+    uint256[] memory retValue = new uint256[](2);
+    retValue[0] = 3000000000000000000000 * ethAmount / 1e18 ;
+    retValue[1] = 1000000000000000000;
+    return retValue;
   }
 
 }

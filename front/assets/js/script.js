@@ -3,7 +3,10 @@
 
 let buildDir, configDir, account, earningRatio, receipts, stakingTokenSymbol, stakingTokenName,
 
-    tokenAddress, chainId = "0x539";
+    tokenAddress,
+    chainId = "0x539";
+    // chainId = "0x2a";
+
 
 // chainId = "0x4";
 
@@ -114,8 +117,8 @@ async function displayVestedData() {
     $("#contract-address").html(vestingContractChoice._address);
 
 
-    let blockBefore = await web3.eth.getBlock();
-    console.log("blockBefore:", blockBefore.timestamp);
+    // let blockBefore = await web3.eth.getBlock();
+    // console.log("blockBefore:", blockBefore.timestamp);
 
     let tokensAvailable = (await vestingContractChoice.methods.vestedAmountAvailable().call({ from: account })) / Math.pow(10, 18);
 
