@@ -21,7 +21,7 @@ contract DataSubClaim {
 
 
      /**
-     * @dev Function to redeem contribution.   
+     * @dev Function to redeem data subscriber tokens   
      */
     function redeem() public {
 
@@ -30,7 +30,6 @@ contract DataSubClaim {
 
           if (!redeemed[msg.sender]){
               redeemed[msg.sender] = true;
-            //   _token.safeTransfer(msg.sender,  amounts[msg.sender]);
               _token.mint(msg.sender,  amounts[msg.sender]);
              emit Redeemed(msg.sender, amounts[msg.sender]);
           }
