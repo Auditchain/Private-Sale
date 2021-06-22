@@ -15,7 +15,7 @@ var BN = web3.utils.BN;
 const timeMachine = require('ganache-time-traveler');
 
 
-contract("Sale contract", (accounts) => {
+contract("Vesting contract", (accounts) => {
 
     const owner = accounts[0];
     const holder1 = accounts[1];
@@ -49,8 +49,8 @@ contract("Sale contract", (accounts) => {
 
         it("Should succeed. vesting deployed and initial values set.", async () => {
 
-            let gas = await token.mint.estimateGas(holder1, 100000, { from: accounts[0] });
-            console.log("gas", gas);
+            // let gas = await token.mint.estimateGas(holder1, 100000, { from: accounts[0] });
+            // console.log("gas", gas);
 
             let platformAccountInContract = await vesting.admin();
             let stakingRatioInContract = await vesting.stakingRatio();
@@ -69,8 +69,8 @@ contract("Sale contract", (accounts) => {
         it("Should succeed. Operator has funded contract with appropriate amount.", async () => {
 
 
-            let gas = await vesting.fundUserMultiple.estimateGas([holder1, holder2, operator, holder1, holder2, operator, holder1, holder2, operator], [fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount], [1, 1, 1, 1, 1, 1, 1, 1, 1], { from: operator });
-            console.log("gas:", gas);
+            // let gas = await vesting.fundUserMultiple.estimateGas([holder1, holder2, operator, holder1, holder2, operator, holder1, holder2, operator], [fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount, fundAmount], [1, 1, 1, 1, 1, 1, 1, 1, 1], { from: operator });
+            // console.log("gas:", gas);
 
             await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
