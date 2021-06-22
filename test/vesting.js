@@ -38,6 +38,8 @@ contract("Sale contract", (accounts) => {
         token = await TOKEN.new(operator);
         vesting = await VESTING.new(operator, token.address, stakingRatio);
 
+
+
         // await token.transfer(operator, token.balanceOf(owner).toString(), { from: owner });
     })
 
@@ -46,6 +48,9 @@ contract("Sale contract", (accounts) => {
     describe("Deploy", async () => {
 
         it("Should succeed. vesting deployed and initial values set.", async () => {
+
+            let gas = await token.mint.estimateGas(holder1, 100000, { from: accounts[0] });
+            console.log("gas", gas);
 
             let platformAccountInContract = await vesting.admin();
             let stakingRatioInContract = await vesting.stakingRatio();
