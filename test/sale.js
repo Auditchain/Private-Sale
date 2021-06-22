@@ -12,6 +12,7 @@ const WHITELIST = artifacts.require('../WhiteList');
 
 var BN = web3.utils.BN;
 const timeMachine = require('ganache-time-traveler');
+import expectRevert from './helpers/expectRevert';
 
 
 
@@ -102,6 +103,7 @@ contract("Sale contract", (accounts) => {
             await whiteList.addWhitelisted(holder1, { from: owner });
             try {
                 await whiteList.addWhitelisted(holder1, { from: owner });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -111,6 +113,7 @@ contract("Sale contract", (accounts) => {
         it("Should fail. Authorized controller removes user who wasn't added before to the white list", async () => {
             try {
                 await whiteList.removeWhitelisted(holder1, { from: owner });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -120,6 +123,7 @@ contract("Sale contract", (accounts) => {
         it("Should fail. Unauthorized controller ads new user to white list", async () => {
             try {
                 await whiteList.addWhitelisted(holder1, { from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -131,6 +135,7 @@ contract("Sale contract", (accounts) => {
             await whiteList.addWhitelisted(holder1, { from: owner });
             try {
                 await whiteList.removeWhitelisted(holder1, { from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -225,9 +230,10 @@ contract("Sale contract", (accounts) => {
 
             sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
 
+            await whiteList.addWhitelisted(holder1, { from: owner });
             try {
-                await whiteList.addWhitelisted(holder1, { from: owner });
                 await sale.buyTokens("0", { value: web3.utils.toWei('1', 'ether'), from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -238,8 +244,8 @@ contract("Sale contract", (accounts) => {
         it("Should fail. Uer is not whitelisted", async () => {
 
             try {
-                // await whiteList.addWhitelisted(holder1, { from: owner });
                 await sale.buyTokens("0", { value: web3.utils.toWei('1', 'ether'), from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -329,9 +335,10 @@ contract("Sale contract", (accounts) => {
 
             sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
 
+            await whiteList.addWhitelisted(holder1, { from: owner });
             try {
-                await whiteList.addWhitelisted(holder1, { from: owner });
                 await sale.buyTokens(daiFunds, { from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -343,6 +350,7 @@ contract("Sale contract", (accounts) => {
 
             try {
                 await sale.buyTokens(daiFunds, { from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -372,6 +380,7 @@ contract("Sale contract", (accounts) => {
 
             try {
                 await sale.claimUnsoldTokens({ from: holder1 });
+                expectRevert();
             }
             catch (error) {
                 ensureException(error);
@@ -517,7 +526,9 @@ contract("Sale contract", (accounts) => {
 
             try {
 
-                let result = await sale.release({ from: holder1 });
+                await sale.release({ from: holder1 });
+                expectRevert();
+
             } catch (error) {
                 ensureException(error);
 

@@ -13,6 +13,7 @@ const VESTING = artifacts.require('../Vesting');
 
 var BN = web3.utils.BN;
 const timeMachine = require('ganache-time-traveler');
+import expectRevert from './helpers/expectRevert';
 
 
 contract("Vesting contract", (accounts) => {
@@ -86,7 +87,8 @@ contract("Vesting contract", (accounts) => {
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
 
             try {
-                let result = await vesting.fundVesting(fundAmount, { from: operator });
+                await vesting.fundVesting(fundAmount, { from: holder1 });
+                expectRevert();
             } catch (error) {
                 ensureException(error);
             }
@@ -99,7 +101,25 @@ contract("Vesting contract", (accounts) => {
             await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
 
             try {
-                let result = await vesting.fundVesting(1, { from: operator });
+                await vesting.fundVesting(1, { from: operator });
+                expectRevert();
+            } catch (error) {
+                ensureException(error);
+            }
+
+        })
+
+        it("Should fail. Operator funded twice.", async () => {
+
+            await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: operator });
+            await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
+
+            await vesting.fundVesting(fundAmount, { from: operator });
+
+            await token.increaseAllowance(vesting.address, fundAmount, { from: operator });
+            try {
+                await vesting.fundVesting(fundAmount, { from: operator });
+                expectRevert();
             } catch (error) {
                 ensureException(error);
             }
@@ -127,8 +147,8 @@ contract("Vesting contract", (accounts) => {
         it("Should fail. Unauthorized User attempted to allocated vesting tokens to another member.", async () => {
 
             try {
-
-                let result = await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: owner });
+                await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: owner });
+                expectRevert();
             } catch (error) {
 
                 ensureException(error);
@@ -143,8 +163,8 @@ contract("Vesting contract", (accounts) => {
             await vesting.fundVesting(fundAmount, { from: operator });
 
             try {
-
                 await vesting.fundUserMultiple([holder1], [fundAmount], [0], { from: owner });
+                expectRevert();
             } catch (error) {
 
                 ensureException(error);
@@ -194,8 +214,8 @@ contract("Vesting contract", (accounts) => {
             await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 10);
 
             try {
-
-                let result = await vesting.release({ from: holder1 });
+                await vesting.release({ from: holder1 });
+                expectRevert();
             } catch (error) {
                 ensureException(error);
 
@@ -298,9 +318,9 @@ contract("Vesting contract", (accounts) => {
             await timeMachine.advanceTimeAndBlock(60 * 60 * 24 * 366);
 
             try {
-
-            } catch (error) {
                 await vesting.release({ from: holder1 });
+                expectRevert();
+            } catch (error) {
                 ensureException(error);
             }
 
@@ -316,8 +336,9 @@ contract("Vesting contract", (accounts) => {
 
             try {
 
-            } catch (error) {
                 await vesting.revoke(holder1, { from: holder2 });
+                expectRevert();
+            } catch (error) {
                 ensureException(error);
             }
 
@@ -360,6 +381,7 @@ contract("Vesting contract", (accounts) => {
 
             try {
                 await vesting.reinstate(holder1, { from: holder1 });
+                expectRevert();
             } catch (error) {
                 ensureException(error);
             }
