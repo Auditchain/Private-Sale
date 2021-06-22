@@ -1,11 +1,11 @@
-// import { platform } from 'ethers';
+// import { platform } from 'ethers';import expectRevert from './helpers/expectRevert'
 import {
     ensureException,
     duration
 } from './helpers/utils.js';
 
 
-import expectRevert from './helpers/expectRevert'
+
 
 const TOKEN = artifacts.require('../AuditToken');
 const REDEEM = artifacts.require('../DataSubClaim')
@@ -15,19 +15,11 @@ contract("Redeem contract", (accounts) => {
 
     const owner = accounts[0];
     const holder1 = accounts[1];
-    const holder2 = accounts[2];
     const wallet = accounts[6];
 
 
     let token;
     let redeem;
-    let sale;
-    let fundingAmount = "15000000000000000000000000";
-    let rateAfterFunding = "100000000000000000";
-    let daiFunds = "3000000000000000000000";
-    let stakingRatio = "10";
-    let days366 = "31622400";   //366 days
-    let cliff14 = "1209600";     //14 days
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
 
 
