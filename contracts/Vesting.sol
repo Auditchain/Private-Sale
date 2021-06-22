@@ -208,7 +208,7 @@ contract Vesting  {
         require(startCountDown.add(DURATION) < block.timestamp, "Vesting:claimStake - Stake can be claimed only after vesting expired");
         uint256 reward = calculateRewardsTotal(msg.sender);
         _token.mint(msg.sender, reward);
-        StakingRewardsReleased(reward, msg.sender);
+        emit StakingRewardsReleased(reward, msg.sender);
     }
 
      /**
