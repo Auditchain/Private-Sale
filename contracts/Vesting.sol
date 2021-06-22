@@ -100,7 +100,7 @@ contract Vesting  {
     function fundUser(address beneficiary, uint256 amount, bool notStaked) internal {
 
         require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
-        require(amount != 0, "Staking:fundUser Amount can't be 0");
+        require(amount != 0, "Vesting:fundUser Amount can't be 0");
         require(!fundingCompleted, "Vesting:fundUser - Funding has been already completed.");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
@@ -215,6 +215,7 @@ contract Vesting  {
      */
     function fundVesting(uint256 amount) public isOperator() {
 
+        require(!fundingCompleted, "Vesting:fundVesting - Funding has been already completed.");
         require(amount == totalRedeemable, "Vesting:fundVesting - Amount of funding has to be equal to vested tokens in the contract.");
         fundingCompleted = true;
         _token.safeTransferFrom(msg.sender, address(this), amount);       
