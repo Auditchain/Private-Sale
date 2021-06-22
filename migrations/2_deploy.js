@@ -3,30 +3,8 @@ const TOKEN = artifacts.require('../AuditToken');
 const ORACLE = artifacts.require('../UniswapPriceOracle');
 const SALE = artifacts.require('../Sale');
 const WHITELIST = artifacts.require('../WhiteList');
-const VESTING = artifacts.require('../Vesting')
-
-
-// const advanceBlockAtTime = (time) => {
-//     return new Promise((resolve, reject) => {
-//         web3.currentProvider.send(
-//             {
-//                 jsonrpc: "2.0",
-//                 method: "evm_increaseTime",
-//                 params: [time],
-//                 id: new Date().getTime(),
-//             },
-//             (err, _) => {
-//                 if (err) {
-//                     return reject(err);
-//                 }
-//                 const newBlockHash = web3.eth.getBlock("latest").hash;
-
-//                 return resolve(newBlockHash);
-//             },
-//         );
-//     });
-// };
-
+const VESTING = artifacts.require('../Vesting');
+const REDEEM = artifacts.require('../DataSubClaim')
 
 
 module.exports = async function (deployer, network, accounts) { // eslint-disable-line..
@@ -60,6 +38,9 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     await deployer.deploy(VESTING, owner, token.address, stakingRatioFund);
     let vesting = await VESTING.deployed();
 
+    await deployer.deploy(REDEEM, token.address);
+    let redeem = await REDEEM.deployed();
+
 
     await token.approve(sale.address, fundingAmount, { from: owner })
     await sale.fundSale(fundingAmount, { from: owner });
@@ -87,7 +68,11 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     console.log('"ORACLE_ADDRESS":"' + oracle.address + '",');
     console.log('"WHITELIST_ADDRESS":"' + whiteList.address + '",');
     console.log('"SALE_ADDRESS":"' + sale.address + '"' + ",");
-    console.log('"VESTING_ADDRESS":"' + vesting.address + '"' + "\n\n");
+    console.log('"VESTING_ADDRESS":"' + vesting.address + '"' + ",");
+    console.log('"REDEEM_ADDRESS":"' + redeem.address + '"' + "\n\n");
+
+
+
 
 
 }
