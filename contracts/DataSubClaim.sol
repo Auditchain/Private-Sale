@@ -27,11 +27,9 @@ contract DataSubClaim {
 
         require(amounts[msg.sender] > 0 , "DataSubClaim:redeem - You don't have any tokens to redeem.");
         require(!redeemed[msg.sender], "DataSubClaim:redeem - You have already redeemed your tokens.");
-
-          if (!redeemed[msg.sender]){
-              redeemed[msg.sender] = true;
-              _token.mint(msg.sender,  amounts[msg.sender]);
-             emit Redeemed(msg.sender, amounts[msg.sender]);
-          }
+       
+        redeemed[msg.sender] = true;
+        _token.mint(msg.sender,  amounts[msg.sender]);
+        emit Redeemed(msg.sender, amounts[msg.sender]);
     }
 }
