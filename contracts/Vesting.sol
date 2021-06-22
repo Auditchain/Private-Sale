@@ -134,7 +134,6 @@ contract Vesting  {
     
     function revoke(address _user) public isOperator(){
 
-        require(msg.sender == admin, "Vesting:revoke - You are not authorized to call this function.");
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
         emit Revoke(_user);
@@ -146,7 +145,6 @@ contract Vesting  {
     */
     function reinstate(address _user) public isOperator(){
 
-        require(msg.sender == admin, "Vesting:reinstate - You are not authorized to call this function.");
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = false; 
         emit Reinstate(_user);
