@@ -272,6 +272,8 @@ contract("Sale contract", (accounts) => {
 
 
             await whiteList.addWhitelisted(holder2, { from: owner });
+
+            //buy some tokens to move price range to 0.125
             for (let i = 0; i < 10; i++) {
 
                 let purchaseAmount = web3.utils.toWei('20', 'ether');
