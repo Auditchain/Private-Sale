@@ -24,9 +24,11 @@ function getPathForDAItoEth() private view returns (address[] memory) {
 
 function getEstimatedDAIForEth(uint ethAmount) public pure returns (uint256[] memory)
   {
+
+    //TO DO Uncomment for testnet or main deployment
     // return uniswapRouter.getAmountsIn(ethAmount, getPathForDAItoEth());
 
-    // Used for local testing
+    // TOD remove when deploying to testnet or main. Used for local testing
     uint256[] memory retValue = new uint256[](2);
     retValue[0] = 3000000000000000000000 * ethAmount / 1e18 ;
     retValue[1] = 1000000000000000000;
