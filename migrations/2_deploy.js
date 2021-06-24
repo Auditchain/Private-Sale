@@ -43,11 +43,13 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
 
 
     await token.approve(sale.address, fundingAmount, { from: owner })
-    await sale.fundSale(fundingAmount, { from: owner });
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
+    let MINTER_ROLE = web3.utils.keccak256("MINTER_ROLE");
+
+
     await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
-    await token.grantRole(CONTROLLER_ROLE, sale.address, { from: owner });
-    await token.grantRole(CONTROLLER_ROLE, vesting.address, { from: owner });
+    await token.grantRole(MINTER_ROLE, sale.address, { from: owner });
+    await token.grantRole(MINTER_ROLE, vesting.address, { from: owner });
     await dai.transfer(holder1, daiFunds, { from: owner });
     await dai.transfer(vesting.address, daiFunds, { from: owner });
 
