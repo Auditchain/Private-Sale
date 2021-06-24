@@ -66,8 +66,8 @@ contract Vesting  {
        /**
     * @dev to check if user is authorized to do admin actions
      */
-    modifier isOperator {
-            require(msg.sender == admin, "Sale:isOperator - Caller is not an operator");
+    modifier isAdmin {
+            require(msg.sender == admin, "Sale:isAdmin - Caller is not an operator");
 
         _;
     }
@@ -97,11 +97,11 @@ contract Vesting  {
      * @param amount - amount of tokens being allocated
      * @param notStaked - flag if user is eligible for vesting rewards 
      */
-    function fundUser(address beneficiary, uint256 amount, bool notStaked) internal {
+    function allocateUser(address beneficiary, uint256 amount, bool notStaked) internal {
 
-        require(address(beneficiary) != address(0), "Staking:fundUser - beneficiary can't be the zero address");      
-        require(amount != 0, "Vesting:fundUser Amount can't be 0");
-        require(!fundingCompleted, "Vesting:fundUser - Funding has been already completed.");
+        require(address(beneficiary) != address(0), "Staking:allocateUser - beneficiary can't be the zero address");      
+        require(amount != 0, "Vesting:allocateUser Amount can't be 0");
+        require(!fundingCompleted, "Vesting:allocateUser - Funding has been already completed.");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += amount;
@@ -117,22 +117,21 @@ contract Vesting  {
      * @param amount - amounts of tokens being allocated
      * @param notStaked - flags if user is eligible for vesting rewards 
      */
-    function fundUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isOperator() {
+    function allocateUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isAdmin() {
 
         uint256 length = beneficiary.length;
-        require(length <= 346, "Vesting-fundUserMultiple: List too long");  
+        require(length <= 346, "Vesting-allocateUserMultiple: List too long");  
         for (uint256 i = 0; i < length; i++) {
-            fundUser(beneficiary[i], amount[i], notStaked[i]);
+            allocateUser(beneficiary[i], amount[i], notStaked[i]);
         }
     }
-   
 
     /**
     * @dev owner can revoke access to continue vesting of tokens
     * @param _user {address} of user to revoke their right to vesting    
     */
     
-    function revoke(address _user) public isOperator(){
+    function revoke(address _user) public isAdmin(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
@@ -143,7 +142,7 @@ contract Vesting  {
     * @dev owner can reinstate access to continue vesting of tokens
     * @param _user {address} of user to reinstate their right to vesting    
     */
-    function reinstate(address _user) public isOperator(){
+    function reinstate(address _user) public isAdmin(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = false; 
@@ -176,7 +175,7 @@ contract Vesting  {
         require(tokensToRelease > 0, "Vesting:release - Cliff is still in effect" ); 
         uint currentTokenToRelease = tokensToRelease - tokenHolder.releasedAmount;
         tokenHolder.releasedAmount += currentTokenToRelease;            
-        _token.safeTransfer(msg.sender, currentTokenToRelease);
+        _token.mint(msg.sender, currentTokenToRelease);
 
       
 
@@ -209,16 +208,5 @@ contract Vesting  {
         emit StakingRewardsReleased(reward, msg.sender);
     }
 
-     /**
-     * @dev Fund vesting with tokens. Only used in stand alone version of vesting. 
-     * @param amount - amount of tokens sent to vesting contract
-     */
-    function fundVesting(uint256 amount) public isOperator() {
-
-        require(!fundingCompleted, "Vesting:fundVesting - Funding has been already completed.");
-        require(amount == totalRedeemable, "Vesting:fundVesting - Amount of funding has to be equal to vested tokens in the contract.");
-        fundingCompleted = true;
-        _token.safeTransferFrom(msg.sender, address(this), amount);       
-        emit VestingFunded(amount);
-    }
+    
 }
