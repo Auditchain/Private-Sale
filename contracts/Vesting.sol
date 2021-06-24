@@ -29,9 +29,9 @@ contract Vesting  {
     uint256 public cliff;           // time in  when vesting should begin
     uint256 public startCountDown;  // time when countdown starts
     uint256 public duration;        // duration of period in which vesting takes place   
-    AuditToken  internal  _token;        // token contract containing tokens
+    AuditToken  internal  _token;   // token contract containing tokens
     mapping(address => TokenHolder) public tokenHolders; //tokenHolder list
-    uint256 public stakingRatio;
+    uint256 public stakingRatio;    // percentage with two extra 0s to accommodate for 2 decimal places. e.g. 13.33%-> 1333, 100% -> 10000
 
     uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
@@ -86,7 +86,7 @@ contract Vesting  {
 
         TokenHolder memory tokenHolder = tokenHolders[user];
         if (!tokenHolder.notStaked )
-            return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(stakingRatio).div(100);
+            return tokenHolder.tokensToSend.sub(tokenHolder.releasedAmount).mul(stakingRatio).div(10000);
         else 
             return 0;
     }
