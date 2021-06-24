@@ -18,7 +18,7 @@ contract Sale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
-    uint256 private _tokensLeft;                        // Amount of tokens in sale contract at given moment    
+    uint256 private _tokensLeft = 15e24;                // Amount of tokens in sale contract at given moment    
     UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
@@ -60,22 +60,9 @@ contract Sale is Vesting, ReentrancyGuard {
         DAI = DAIAddress;
     }
 
-     /**
-     * @dev Fund Sale with tokens.
-     * @param amount - amount of tokens sent to Sale for sale
-     */
-    function fundSale(uint256 amount) public isOperator() {
-
-        require(amount == 15e24, "Sale:fundSale - Amount of funding has to be 15,000,000 AUDT");
-       IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
-        _tokensLeft = amount;
-        emit TokensDeposited(amount);
-    }
-
-
     
     /**
-    * @dev determine rate of sale based on amount of tokens available in contract
+    * @dev determine rate of sale based on amount of tokens available for sale
      */
     function _determineRate() internal view returns (uint256) {
 
@@ -152,7 +139,7 @@ contract Sale is Vesting, ReentrancyGuard {
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += vestedAmount;
-        IERC20(_token).safeTransfer(beneficiary, instantAmount);
+        _token.mint(beneficiary, instantAmount);
         
         emit TokensPurchased(beneficiary, weiAmount, DAIAmountContributed, vestedAmount, instantAmount);
 
@@ -244,12 +231,5 @@ contract Sale is Vesting, ReentrancyGuard {
         emit FundsForwarded(msg.value, DAIAmount);
 
     }
-    /**
-     * @dev Claim unsold tokens after campaign 
-     */
-    function claimUnsoldTokens() public nonReentrant isOperator() {
-        IERC20(_token).safeTransfer(_wallet, _tokensLeft);
-        emit TokensWithdrawn(_tokensLeft);
-        _tokensLeft = 0;
-    }
+  
 }
