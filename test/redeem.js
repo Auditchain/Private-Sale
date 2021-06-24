@@ -21,6 +21,8 @@ contract("Redeem contract", (accounts) => {
     let token;
     let redeem;
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
+    let MINTER_ROLE = web3.utils.keccak256("MINTER_ROLE");
+
 
 
     beforeEach(async () => {
@@ -28,7 +30,7 @@ contract("Redeem contract", (accounts) => {
         token = await TOKEN.new(owner);
         redeem = await REDEEM.new(token.address);
 
-        await token.grantRole(CONTROLLER_ROLE, redeem.address, { from: owner });
+        await token.grantRole(MINTER_ROLE, redeem.address, { from: owner });
 
     })
 
