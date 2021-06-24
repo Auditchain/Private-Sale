@@ -36,6 +36,7 @@ contract("Sale contract", (accounts) => {
     let days366 = "31622400";   //366 days
     let cliff14 = "1209600";     //14 days
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
+    let MINTER_ROLE = web3.utils.keccak256("MINTER_ROLE");
 
 
 
@@ -48,23 +49,18 @@ contract("Sale contract", (accounts) => {
 
         sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
         await token.approve(sale.address, fundingAmount, { from: owner })
-        await sale.fundSale(fundingAmount, { from: owner });
         let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
         await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
         await dai.transfer(holder1, daiFunds, { from: owner });
+        await token.grantRole(MINTER_ROLE, sale.address, { from: owner });
 
     })
 
     describe("Deploy", async () => {
 
-        it("Should succeed. sale deployed and tokens transferred", async () => {
+        it("Should succeed. sale deployed and initial params set", async () => {
 
             sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            await sale.fundSale(fundingAmount, { from: owner });
-
-            let tokenInSale = await token.balanceOf(sale.address);
-            assert.strictEqual(tokenInSale.toString(), fundingAmount);
             let rate = await sale.rate();
             assert.strictEqual(rate.toString(), rateAfterFunding);
 
@@ -72,9 +68,9 @@ contract("Sale contract", (accounts) => {
             let stakingRatioInContract = await sale.stakingRatio();
             let vestingSchedule = await sale.returnVestingSchedule();
 
-            assert.strictEqual(owner, platformAccountInContract);                   // platform account
-            assert.strictEqual(stakingRatio, stakingRatioInContract.toString());              // staking ratio
-            assert.strictEqual(days366, vestingSchedule[0].toString());                       // duration
+            assert.strictEqual(owner, platformAccountInContract);                           // platform account
+            assert.strictEqual(stakingRatio, stakingRatioInContract.toString());            // staking ratio
+            assert.strictEqual(days366, vestingSchedule[0].toString());                     // duration
             // assert.strictEqual(vestingSchedule[2].toString(), vestingSchedule[3].toString()); // Start = blockNumber
             assert.strictEqual((Number(cliff14) + Number(vestingSchedule[2])).toString(), vestingSchedule[1].toString()); //cliff
         })
@@ -359,36 +355,7 @@ contract("Sale contract", (accounts) => {
         })
     })
 
-    describe('Collect unsold tokens', async () => {
-        it('Should succeed. Authorized user can claim unused tokens at any time', async () => {
 
-            const tokensBeforeSale = token.balanceOf(sale.address);
-            const tokensBeforeOperator = token.balanceOf(wallet);
-
-            await sale.claimUnsoldTokens({ from: owner });
-
-            const tokensAfterSale = token.balanceOf(sale.address);
-            const tokensAfterOperator = token.balanceOf(wallet);
-
-            assert.strictEqual(tokensBeforeSale.toString(), tokensAfterOperator.toString());
-            assert.strictEqual(tokensBeforeOperator.toString(), tokensAfterSale.toString());
-
-
-        })
-
-        it('Should fail. Unauthorized user can not claim unused tokens at any time', async () => {
-
-            try {
-                await sale.claimUnsoldTokens({ from: holder1 });
-                expectRevert();
-            }
-            catch (error) {
-                ensureException(error);
-            }
-
-
-        })
-    })
 
     describe('events', async () => {
 
@@ -429,28 +396,6 @@ contract("Sale contract", (accounts) => {
             let event = result.logs[1];
             assert.equal(event.event, 'TokensPurchased');
             assert.equal(new BN(event.args.vestedAmount).add(event.args.instantAmount).toString(), "30000000000000000000000");
-        })
-
-        it('should log TokensDeposited  after initial deposit of tokens', async () => {
-
-            sale = await SALE.new(oracle.address, wallet, token.address, dai.address, whiteList.address, owner, stakingRatio);
-            await token.approve(sale.address, fundingAmount, { from: owner })
-            let result = await sale.fundSale(fundingAmount, { from: owner });
-
-            assert.lengthOf(result.logs, 1);
-            let event = result.logs[0];
-            assert.equal(event.event, 'TokensDeposited');
-            assert.equal(event.args.amount, fundingAmount);
-        })
-
-        it('should log TokensWithdrawn  after withdrawing outstanding tokens', async () => {
-
-
-            let result = await sale.claimUnsoldTokens({ from: owner });
-            assert.lengthOf(result.logs, 1);
-            let event = result.logs[0];
-            assert.equal(event.event, 'TokensWithdrawn');
-            assert.equal(event.args.amount, fundingAmount);
         })
 
 
