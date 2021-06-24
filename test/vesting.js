@@ -20,7 +20,7 @@ contract("Vesting contract", (accounts) => {
 
     let token;
     let vesting;
-    let stakingRatio = "50";
+    let stakingRatio = "10000";  // 100% with 2 decimals
     let days366 = "31622400";   //366 days
     let cliff14 = "1209600";     //14 days
     let fundAmount = "30000000000000000000000";
@@ -162,15 +162,22 @@ contract("Vesting contract", (accounts) => {
             let rewardsTotal = await vesting.calculateRewardsTotal(holder1);
             let result = await vesting.release({ from: holder1 });
 
+            let vestedAmountCalc = "30000000000000000000000";
+            let vestedRewardsCalc = "30000000000000000000000";
+
             assert.lengthOf(result.logs, 2);
             let event = result.logs[0];
             assert.equal(event.event, 'StakingRewardsReleased');
             assert.equal(event.args.amount.toString(), rewardsTotal.toString());
+            assert.equal(event.args.amount.toString(), vestedRewardsCalc.toString());
+
+            console.log("vesting reward", event.args.amount.toString())
 
             event = result.logs[1];
             assert.equal(event.event, 'VestedPortionReleased');
             assert.equal(event.args.user, holder1);
             assert.equal(event.args.amount.toString(), vestedAmountAvailable.toString());
+            assert.equal(event.args.amount.toString(), vestedAmountCalc.toString());
 
         })
 
