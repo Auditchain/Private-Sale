@@ -32,7 +32,7 @@ contract("Sale contract", (accounts) => {
     let fundingAmount = "15000000000000000000000000";
     let rateAfterFunding = "100000000000000000";
     let daiFunds = "3000000000000000000000";
-    let stakingRatio = "10";
+    let stakingRatio = "1333";   // 13.33% with two decimal places
     let days366 = "31622400";   //366 days
     let cliff14 = "1209600";     //14 days
     let CONTROLLER_ROLE = web3.utils.keccak256("CONTROLLER_ROLE");
@@ -492,15 +492,22 @@ contract("Sale contract", (accounts) => {
             let rewardsTotal = await sale.calculateRewardsTotal(holder1);
             let result = await sale.release({ from: holder1 });
 
+            let vestedAmountCalc = "22500000000000000000000";
+            let vestedRewardsCalc = "2999250000000000000000";
+
             assert.lengthOf(result.logs, 2);
             let event = result.logs[0];
             assert.equal(event.event, 'StakingRewardsReleased');
             assert.equal(event.args.amount.toString(), rewardsTotal.toString());
 
+            assert.equal(event.args.amount.toString(), vestedRewardsCalc.toString());
+
             event = result.logs[1];
             assert.equal(event.event, 'VestedPortionReleased');
             assert.equal(event.args.user, holder1);
             assert.equal(event.args.amount.toString(), vestedAmountAvailable.toString());
+            assert.equal(event.args.amount.toString(), vestedAmountCalc.toString());
+
 
         })
 
