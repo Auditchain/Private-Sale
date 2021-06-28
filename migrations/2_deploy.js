@@ -50,6 +50,8 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
     await whiteList.grantRole(CONTROLLER_ROLE, owner, { from: owner });
     await token.grantRole(MINTER_ROLE, sale.address, { from: owner });
     await token.grantRole(MINTER_ROLE, vesting.address, { from: owner });
+    await token.grantRole(MINTER_ROLE, redeem.address, { from: owner });
+
     await dai.transfer(holder1, daiFunds, { from: owner });
     await dai.transfer(vesting.address, daiFunds, { from: owner });
 

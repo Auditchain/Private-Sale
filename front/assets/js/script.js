@@ -5,13 +5,13 @@ let buildDir, configDir, account, earningRatio, receipts, stakingTokenSymbol, st
 
     tokenAddress,
     chainId = "0x539";
-    // chainId = "0x2a";
+// chainId = "0x2a";
 
 
 // chainId = "0x4";
 
 let DAIAddress, oracleAddress, whitelistAddress, vestingAddress, saleAddress, tokenContract, DAIContract, oracleContract, saleContract, whitelistContract,
-    vestingContract, daiRate, ethRate, tokensLeft, vestingContractChoice;
+    vestingContract, daiRate, ethRate, tokensLeft, vestingContractChoice, fiftyPercentContractAddress, dataSubClaimContract;
 
 
 // chainId = "0x539"
@@ -59,6 +59,7 @@ async function init() {
 
         await getAccount(1);
 
+
         // var interval = setInterval(function () {
         //     loadPortfolio(selectedCapsule).then(function (res, err) {
         //         return displayProgress(selectedCapsule);
@@ -71,6 +72,13 @@ async function init() {
         $(".enableEthereumButton").css("display", "block");
         $(".content").css("display", "none");
     }
+}
+
+
+async function renderPage() {
+    if (window.location.href.indexOf("ClaimFiftyPercent") > 0)
+        await displayFiftyPercent();
+
 }
 
 function claimVestedTokens() {
@@ -110,6 +118,66 @@ function claimVestedTokens() {
 
 }
 
+
+function ClaimFiftyPercent() {
+
+    return new Promise(async function (resolve, reject) {
+
+        let id = progressAction("Claiming 50% of your early investor tokens...", 1, "", false, true);
+
+        dataSubClaimContract.methods
+            .redeem()
+            .send({ from: account })
+            .on("receipt", function (receipt) {
+                const event = receipt.events.Redeemed.returnValues;
+                const amountRedeemed = event.amount;
+
+                let msg = "You have successfully claimed: " + new Decimal(amountRedeemed).dividedBy(Math.pow(10, 18)) + " AUDT tokens";
+
+                progressAction(msg, 2, id, false, false);
+                displayFiftyPercent();
+                resolve(receipt);
+            })
+            .on("error", function (error) {
+                progressAction(error.message, 2, id, false, false);
+                reject(error);
+            });
+    });
+
+
+}
+
+
+
+async function displayFiftyPercent() {
+
+
+    $("#contract-address").html(fiftyPercentContractAddress);
+
+
+    // let blockBefore = await web3.eth.getBlock();
+    // console.log("blockBefore:", blockBefore.timestamp);
+
+    let tokensAvailable = (await dataSubClaimContract.methods.amounts(account).call({ from: account })) / Math.pow(10, 18);
+
+    $("#all-tokens-purchased").html(tokensAvailable.toFixed(2));
+
+    let claimed = await dataSubClaimContract.methods.redeemed(account).call({ from: account });
+
+    if (!claimed && tokensAvailable) {
+        $("#tokens-available").html(tokensAvailable.toFixed(2));
+        $("#all-tokens-claimed").html("0.00");
+        $('#claim-tokens-fifty-percent').prop('disabled', false);
+
+    }
+    else {
+        $("#tokens-available").html("0.00");
+        $("#all-tokens-claimed").html(tokensAvailable.toFixed(2));
+        $('#claim-tokens-fifty-percent').prop('disabled', true);
+
+    }
+
+}
 
 async function displayVestedData() {
 
@@ -222,6 +290,10 @@ async function getAccount() {
         }
         else
             $("#noticeModal").modal();
+    }).then(function () {
+
+        renderPage();
+
     }).catch(function (res) {
         console.log(res);
     })
@@ -277,7 +349,7 @@ async function loadContracts() {
     let res = await loadConfig("contracts.json");
 
     let actual_JSON = JSON.parse(res);
-    const { AUDT_TOKEN_ADDRESS, DAI_ADDRESS, ORACLE_ADDRESS, WHITELIST_ADDRESS, SALE_ADDRESS, VESTING_ADDRESS } = actual_JSON;
+    const { AUDT_TOKEN_ADDRESS, DAI_ADDRESS, ORACLE_ADDRESS, WHITELIST_ADDRESS, SALE_ADDRESS, VESTING_ADDRESS, REDEEM_ADDRESS } = actual_JSON;
 
     tokenAddress = AUDT_TOKEN_ADDRESS;
     DAIAddress = DAI_ADDRESS;
@@ -285,6 +357,7 @@ async function loadContracts() {
     whitelistAddress = WHITELIST_ADDRESS;
     saleAddress = SALE_ADDRESS;
     vestingAddress = VESTING_ADDRESS;
+    fiftyPercentContractAddress = REDEEM_ADDRESS;
 
 
     res = await loadJSON("AuditToken.json");
@@ -310,6 +383,10 @@ async function loadContracts() {
     res = await loadJSON("Vesting.json");
     actual_JSON = JSON.parse(res);
     vestingContract = new web3.eth.Contract(actual_JSON["abi"], vestingAddress);
+
+    res = await loadJSON("DataSubClaim.json");
+    actual_JSON = JSON.parse(res);
+    dataSubClaimContract = new web3.eth.Contract(actual_JSON["abi"], fiftyPercentContractAddress);
 
     // findCohorts();
 }
@@ -806,6 +883,11 @@ $(document).ready(function () {
 
     $("#claim-stake").click(function () {
         claimStake();
+    });
+
+
+    $("#claim-tokens-fifty-percent").click(function () {
+        ClaimFiftyPercent();
     });
 
 
