@@ -168,7 +168,7 @@ contract Vesting  {
         require(!tokenHolder.revoked, "Vesting:release - Your vesting has been revoked.");                                   
         require( tokenHolder.releasedAmount <= tokenHolder.tokensToSend, "Vesting:release - You have already claimed all your tokens."); 
 
-        if (startCountDown.add(DURATION) < block.timestamp)
+        if (startCountDown.add(DURATION) < block.timestamp && !tokenHolder.notStaked )
             claimStake();
 
         uint tokensToRelease = vestedAmount(tokenHolder.tokensToSend);     
