@@ -655,7 +655,7 @@ function enterFundingAmount() {
         let id = progressAction("Funding Member/Early Investor...", 1, "", false, true);
 
         vestingContractChoice.methods
-            .fundUser(beneficiary, amount, staking)
+            .allocateUserMultiple([beneficiary], [amount], [staking])
             .send({ from: account })
             .on("receipt", function (receipt) {
                 const event = receipt.events.MemberFunded.returnValues;
