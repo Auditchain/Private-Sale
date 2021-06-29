@@ -85,6 +85,12 @@ module.exports = async function (deployer, network, accounts) { // eslint-disabl
 
 
 
-
+    console.log("\n\n" + 'audtTokenAddress:"' + token.address + '",');
+    console.log('daiAddress:"' + dai.address + '",');
+    console.log('oracleAddress:"' + oracle.address + '",');
+    console.log('whitelistAddress:"' + whiteList.address + '",');
+    console.log('saleAddress:"' + sale.address + '",');
+    console.log('vestingAddress:"' + vesting.address + '",');
+    console.log('DataSubClaimAddress:"' + redeem.address + '",' + "\n\n");
 
 }
