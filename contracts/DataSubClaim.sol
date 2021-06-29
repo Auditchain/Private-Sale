@@ -13,9 +13,9 @@ contract DataSubClaim {
 
     constructor(address auditToken) {
       // example data
-        amounts[0x67794670742BA1E53FD04d8bA22a9b4487CE65B4] = 200 * 10e18;        
-        amounts[0x4311eD2826C3D4E7c82149fAAEe9FB7f40e05568] = 200 * 10e18;        
-        amounts[0xd431134b507d3B6F2742687e14cD9CbA5b6BE0F4] = 100 * 10e18;       
+        amounts[0x67794670742BA1E53FD04d8bA22a9b4487CE65B4] = 2000 * 1e18;        
+        amounts[0x4311eD2826C3D4E7c82149fAAEe9FB7f40e05568] = 2000 * 1e18;        
+        amounts[0xd431134b507d3B6F2742687e14cD9CbA5b6BE0F4] = 1000 * 1e18;       
         _token = AuditToken(auditToken);
     }
 
