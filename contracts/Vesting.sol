@@ -38,7 +38,6 @@ contract Vesting  {
     // uint256 public constant STAKING_RATIO = 50;
     address public admin;
     uint256 public totalRedeemable;
-    bool public fundingCompleted;
     
 
     /**
@@ -101,7 +100,6 @@ contract Vesting  {
 
         require(address(beneficiary) != address(0), "Staking:allocateUser - beneficiary can't be the zero address");      
         require(amount != 0, "Vesting:allocateUser Amount can't be 0");
-        require(!fundingCompleted, "Vesting:allocateUser - Funding has been already completed.");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
         tokenHolder.tokensToSend += amount;
