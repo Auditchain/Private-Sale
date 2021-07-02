@@ -407,10 +407,16 @@ contract Locked is AccessControl {
 
     // Create a new role identifier for the controller role
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-       modifier isController {
+    modifier isController {
             require(hasRole(CONTROLLER_ROLE, msg.sender), "Locked::isController - Caller is not a controller");
 
+        _;
+    }
+
+    modifier isMinter {
+            require(hasRole(MINTER_ROLE, msg.sender), "Locked::isMinter - Caller is not a minter");
         _;
     }
 
@@ -420,7 +426,7 @@ contract Locked is AccessControl {
     /// @param _to  - user involved in process
     modifier isNotLocked(address _from, address _to) {
 
-        if (hasRole(DEFAULT_ADMIN_ROLE, _from)){  // allow contract admin on sending tokens even if recipient is locked
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _from)){  // allow contract admin on sending tokens even if recipient is locked
             require(!lockedList[_from], "Locked::isNotLocked - User is locked");
             require(!lockedList[_to], "Locked::isNotLocked - User is locked");
         }
