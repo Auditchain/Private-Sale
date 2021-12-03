@@ -33,7 +33,9 @@ contract Vesting  {
     mapping(address => TokenHolder) public tokenHolders; //tokenHolder list
     uint256 public stakingRatio;    // percentage with two extra 0s to accommodate for 2 decimal places. e.g. 13.33%-> 1333, 100% -> 10000
 
-    uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
+    // uint256 public constant CLIFF = 60 * 60 * 24 * 14;      // 14 days
+    uint256 public constant CLIFF = 0;      // 14 days
+
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
     // uint256 public constant STAKING_RATIO = 50;
     address public admin;
