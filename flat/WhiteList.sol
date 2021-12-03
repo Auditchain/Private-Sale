@@ -1,6 +1,6 @@
 pragma solidity =0.8.0;
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-: MITIdentifier
 
 
 
@@ -20,12 +20,11 @@ abstract contract Context {
     }
 
     function _msgData() internal view virtual returns (bytes calldata) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -33,7 +32,7 @@ abstract contract Context {
  * @dev String operations.
  */
 library Strings {
-    bytes16 private constant alphabet = "0123456789abcdef";
+    bytes16 private constant _HEX_SYMBOLS = "0123456789abcdef";
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` decimal representation.
@@ -84,16 +83,15 @@ library Strings {
         buffer[0] = "0";
         buffer[1] = "x";
         for (uint256 i = 2 * length + 1; i > 1; --i) {
-            buffer[i] = alphabet[value & 0xf];
+            buffer[i] = _HEX_SYMBOLS[value & 0xf];
             value >>= 4;
         }
         require(value == 0, "Strings: hex length insufficient");
         return string(buffer);
     }
-
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -118,7 +116,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -147,7 +145,7 @@ abstract contract ERC165 is IERC165 {
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -160,9 +158,13 @@ abstract contract ERC165 is IERC165 {
  */
 interface IAccessControl {
     function hasRole(bytes32 role, address account) external view returns (bool);
+
     function getRoleAdmin(bytes32 role) external view returns (bytes32);
+
     function grantRole(bytes32 role, address account) external;
+
     function revokeRole(bytes32 role, address account) external;
+
     function renounceRole(bytes32 role, address account) external;
 }
 
@@ -206,11 +208,11 @@ interface IAccessControl {
  */
 abstract contract AccessControl is Context, IAccessControl, ERC165 {
     struct RoleData {
-        mapping (address => bool) members;
+        mapping(address => bool) members;
         bytes32 adminRole;
     }
 
-    mapping (bytes32 => RoleData) private _roles;
+    mapping(bytes32 => RoleData) private _roles;
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
@@ -260,8 +262,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IAccessControl).interfaceId
-            || super.supportsInterface(interfaceId);
+        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -279,13 +280,17 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      *  /^AccessControl: account (0x[0-9a-f]{20}) is missing role (0x[0-9a-f]{32})$/
      */
     function _checkRole(bytes32 role, address account) internal view {
-        if(!hasRole(role, account)) {
-            revert(string(abi.encodePacked(
-                "AccessControl: account ",
-                Strings.toHexString(uint160(account), 20),
-                " is missing role ",
-                Strings.toHexString(uint256(role), 32)
-            )));
+        if (!hasRole(role, account)) {
+            revert(
+                string(
+                    abi.encodePacked(
+                        "AccessControl: account ",
+                        Strings.toHexString(uint160(account), 20),
+                        " is missing role ",
+                        Strings.toHexString(uint256(role), 32)
+                    )
+                )
+            );
         }
     }
 
@@ -391,7 +396,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 /**
  * @title Whitelist
  * @dev this contract enables whitelisting of users.

@@ -61,7 +61,11 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -78,7 +82,7 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -106,7 +110,7 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -126,12 +130,11 @@ abstract contract Context {
     }
 
     function _msgData() internal view virtual returns (bytes calldata) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -164,9 +167,9 @@ abstract contract Context {
  * allowances. See {IERC20-approve}.
  */
 contract ERC20 is Context, IERC20, IERC20Metadata {
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping (address => mapping (address => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
@@ -176,13 +179,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
-     * The defaut value of {decimals} is 18. To select a different value for
+     * The default value of {decimals} is 18. To select a different value for
      * {decimals} you should overload it.
      *
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor (string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
     }
@@ -278,12 +281,18 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - the caller must have allowance for ``sender``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
 
         uint256 currentAllowance = _allowances[sender][_msgSender()];
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        _approve(sender, _msgSender(), currentAllowance - amount);
+        unchecked {
+            _approve(sender, _msgSender(), currentAllowance - amount);
+        }
 
         return true;
     }
@@ -322,15 +331,17 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         uint256 currentAllowance = _allowances[_msgSender()][spender];
         require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
-        _approve(_msgSender(), spender, currentAllowance - subtractedValue);
+        unchecked {
+            _approve(_msgSender(), spender, currentAllowance - subtractedValue);
+        }
 
         return true;
     }
 
     /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     * @dev Moves `amount` of tokens from `sender` to `recipient`.
      *
-     * This is internal function is equivalent to {transfer}, and can be used to
+     * This internal function is equivalent to {transfer}, and can be used to
      * e.g. implement automatic token fees, slashing mechanisms, etc.
      *
      * Emits a {Transfer} event.
@@ -341,7 +352,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `recipient` cannot be the zero address.
      * - `sender` must have a balance of at least `amount`.
      */
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -349,10 +364,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         uint256 senderBalance = _balances[sender];
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
-        _balances[sender] = senderBalance - amount;
+        unchecked {
+            _balances[sender] = senderBalance - amount;
+        }
         _balances[recipient] += amount;
 
         emit Transfer(sender, recipient, amount);
+
+        _afterTokenTransfer(sender, recipient, amount);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -362,7 +381,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * Requirements:
      *
-     * - `to` cannot be the zero address.
+     * - `account` cannot be the zero address.
      */
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
@@ -372,6 +391,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _totalSupply += amount;
         _balances[account] += amount;
         emit Transfer(address(0), account, amount);
+
+        _afterTokenTransfer(address(0), account, amount);
     }
 
     /**
@@ -392,10 +413,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        _balances[account] = accountBalance - amount;
+        unchecked {
+            _balances[account] = accountBalance - amount;
+        }
         _totalSupply -= amount;
 
         emit Transfer(account, address(0), amount);
+
+        _afterTokenTransfer(account, address(0), amount);
     }
 
     /**
@@ -411,7 +436,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function _approve(address owner, address spender, uint256 amount) internal virtual {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -426,17 +455,41 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * Calling conditions:
      *
      * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * will be to transferred to `to`.
+     * will be transferred to `to`.
      * - when `from` is zero, `amount` tokens will be minted for `to`.
      * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
      * - `from` and `to` are never both zero.
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual {}
+
+    /**
+     * @dev Hook that is called after any transfer of tokens. This includes
+     * minting and burning.
+     *
+     * Calling conditions:
+     *
+     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
+     * has been transferred to `to`.
+     * - when `from` is zero, `amount` tokens have been minted for `to`.
+     * - when `to` is zero, `amount` of ``from``'s tokens have been burned.
+     * - `from` and `to` are never both zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual {}
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -472,12 +525,14 @@ abstract contract ERC20Burnable is Context, ERC20 {
     function burnFrom(address account, uint256 amount) public virtual {
         uint256 currentAllowance = allowance(account, _msgSender());
         require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
-        _approve(account, _msgSender(), currentAllowance - amount);
+        unchecked {
+            _approve(account, _msgSender(), currentAllowance - amount);
+        }
         _burn(account, amount);
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -485,7 +540,7 @@ abstract contract ERC20Burnable is Context, ERC20 {
  * @dev String operations.
  */
 library Strings {
-    bytes16 private constant alphabet = "0123456789abcdef";
+    bytes16 private constant _HEX_SYMBOLS = "0123456789abcdef";
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` decimal representation.
@@ -536,16 +591,15 @@ library Strings {
         buffer[0] = "0";
         buffer[1] = "x";
         for (uint256 i = 2 * length + 1; i > 1; --i) {
-            buffer[i] = alphabet[value & 0xf];
+            buffer[i] = _HEX_SYMBOLS[value & 0xf];
             value >>= 4;
         }
         require(value == 0, "Strings: hex length insufficient");
         return string(buffer);
     }
-
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -570,7 +624,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -599,7 +653,7 @@ abstract contract ERC165 is IERC165 {
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -612,9 +666,13 @@ abstract contract ERC165 is IERC165 {
  */
 interface IAccessControl {
     function hasRole(bytes32 role, address account) external view returns (bool);
+
     function getRoleAdmin(bytes32 role) external view returns (bytes32);
+
     function grantRole(bytes32 role, address account) external;
+
     function revokeRole(bytes32 role, address account) external;
+
     function renounceRole(bytes32 role, address account) external;
 }
 
@@ -658,11 +716,11 @@ interface IAccessControl {
  */
 abstract contract AccessControl is Context, IAccessControl, ERC165 {
     struct RoleData {
-        mapping (address => bool) members;
+        mapping(address => bool) members;
         bytes32 adminRole;
     }
 
-    mapping (bytes32 => RoleData) private _roles;
+    mapping(bytes32 => RoleData) private _roles;
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
@@ -712,8 +770,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IAccessControl).interfaceId
-            || super.supportsInterface(interfaceId);
+        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -731,13 +788,17 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      *  /^AccessControl: account (0x[0-9a-f]{20}) is missing role (0x[0-9a-f]{32})$/
      */
     function _checkRole(bytes32 role, address account) internal view {
-        if(!hasRole(role, account)) {
-            revert(string(abi.encodePacked(
-                "AccessControl: account ",
-                Strings.toHexString(uint160(account), 20),
-                " is missing role ",
-                Strings.toHexString(uint256(role), 32)
-            )));
+        if (!hasRole(role, account)) {
+            revert(
+                string(
+                    abi.encodePacked(
+                        "AccessControl: account ",
+                        Strings.toHexString(uint160(account), 20),
+                        " is missing role ",
+                        Strings.toHexString(uint256(role), 32)
+                    )
+                )
+            );
         }
     }
 
@@ -843,7 +904,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
     }
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 
@@ -929,7 +990,7 @@ contract Locked is AccessControl {
 
 }
 
-// SPDX-License-Identifier: MIT
+
 
 
 pragma experimental ABIEncoderV2;
@@ -971,16 +1032,12 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
     /// @notice An event thats emitted when a delegate account's vote balance changes
     event DelegateVotesChanged(address indexed delegate, uint previousBalance, uint newBalance);
 
-
-    uint8 public constant DECIMALS = 18;
-    uint256 public constant INITIAL_SUPPLY = 250000000 * (10**uint256(DECIMALS));
-    address public migrationAgent;
-    uint256 public totalMigrated;
+    address public childChainManagerProxy;
     
     /// @dev Constructor that gives an account all initial tokens.
     constructor(address account) ERC20("Auditchain", "AUDT") {
         require(account != address(0), "AuditToken:constructor - Address can't be 0");
-        _mint(account, INITIAL_SUPPLY);      
+        // _mint(account, INITIAL_SUPPLY);      
         _setupRole(DEFAULT_ADMIN_ROLE, account);
     }
 
@@ -992,6 +1049,24 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
             "You are trying to send tokens to this token contract"
         );
         _;
+    }
+
+    function setChildChainManager(address manager) public isController() {
+        require(manager != address(0), "AuditToken:setChildChainManager - Address can't be 0");
+        childChainManagerProxy= manager;
+
+    }
+    
+    function deposit(address user, bytes calldata depositData) external {
+
+        require(msg.sender == childChainManagerProxy, "You're not allowed to deposit");
+        uint256 amount = abi.decode(depositData, (uint256));
+        // `amount` token getting minted here & equal amount got locked in RootChainManager
+        _mint(user, amount);
+    }
+
+    function withdraw(uint256 amount) external {
+        burn(amount);
     }
 
     /// @notice Overwrite parent implementation to add locked verification, notSelf modifiers and call to moveDelegates
