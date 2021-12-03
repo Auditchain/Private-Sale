@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./UniswapPriceOracle.sol";
+// import "./UniswapPriceOracle.sol";
+import "./SushiSwapPriceOracle.sol";
 import "./WhiteList.sol";
 import "./Vesting.sol";
 
@@ -19,7 +20,8 @@ contract Sale is Vesting, ReentrancyGuard {
     using SafeERC20 for IERC20;
    
     uint256 private _tokensLeft = 15e24;                // Amount of tokens in sale contract at given moment    
-    UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
+    // UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
+    SushiSwapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
     uint256 private _DAIRaised;                         // Amount of DAI raised
@@ -55,7 +57,7 @@ contract Sale is Vesting, ReentrancyGuard {
         require(whitelist != address(0), "Sale: Whitelist is zero address");
       
         _wallet = cWallet;
-        _uniswapPriceOracle = UniswapPriceOracle(oracle);
+        _uniswapPriceOracle = SushiSwapPriceOracle(oracle);
         whiteList = WhiteList(whitelist);
         DAI = DAIAddress;
     }
