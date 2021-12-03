@@ -40,16 +40,12 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
     /// @notice An event thats emitted when a delegate account's vote balance changes
     event DelegateVotesChanged(address indexed delegate, uint previousBalance, uint newBalance);
 
-
-    uint8 public constant DECIMALS = 18;
-    uint256 public constant INITIAL_SUPPLY = 250000000 * (10**uint256(DECIMALS));
-    address public migrationAgent;
-    uint256 public totalMigrated;
+    address public childChainManagerProxy;
     
     /// @dev Constructor that gives an account all initial tokens.
     constructor(address account) ERC20("Auditchain", "AUDT") {
         require(account != address(0), "AuditToken:constructor - Address can't be 0");
-        _mint(account, INITIAL_SUPPLY);      
+        // _mint(account, INITIAL_SUPPLY);      
         _setupRole(DEFAULT_ADMIN_ROLE, account);
     }
 
@@ -61,6 +57,24 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
             "You are trying to send tokens to this token contract"
         );
         _;
+    }
+
+    function setChildChainManager(address manager) public isController() {
+        require(manager != address(0), "AuditToken:setChildChainManager - Address can't be 0");
+        childChainManagerProxy= manager;
+
+    }
+    
+    function deposit(address user, bytes calldata depositData) external {
+
+        require(msg.sender == childChainManagerProxy, "You're not allowed to deposit");
+        uint256 amount = abi.decode(depositData, (uint256));
+        // `amount` token getting minted here & equal amount got locked in RootChainManager
+        _mint(user, amount);
+    }
+
+    function withdraw(uint256 amount) external {
+        burn(amount);
     }
 
     /// @notice Overwrite parent implementation to add locked verification, notSelf modifiers and call to moveDelegates
