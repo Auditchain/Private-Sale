@@ -8,16 +8,18 @@ dotenv.config();
 
 const HDWalletProvider = require("truffle-hdwallet-provider");
 const MNEMONIC = process.env.MNEMONIC
-const INFURA_KEY = process.env.INFURA_KEY
+const INFURA_KEY = process.env.INFURA_KEY;
+const maticmumbai_rpc_url = 'https://matic-mumbai.chainstacklabs.com'
+
 
 console.log("Infura key:" + process.env.INFURA_KEY);
 
-// if (!MNEMONIC || !INFURA_KEY) {
+if (!MNEMONIC || !INFURA_KEY) {
 
 
-//   console.error("Please set a mnemonic and infura key...")
-//   return
-// }
+  console.error("Please set a mnemonic and infura key...")
+  return
+}
 
 module.exports = {
   networks: {
@@ -64,6 +66,13 @@ module.exports = {
 
 
     },
+    maticmumbai: {
+			provider: function() {
+				return new HDWalletProvider(MNEMONIC, maticmumbai_rpc_url);
+			  },
+			  network_id: '80001',
+      skipDryRun: true,
+		} ,
     coverage: {
       host: 'localhost',
       network_id: '*',
