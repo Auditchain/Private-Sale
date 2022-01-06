@@ -3,12 +3,13 @@ pragma solidity =0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./AuditToken.sol";
 
 
 // @note this contract can be inherited by Sale contract 
 // control release of tokens through even time release based on the inputted duration time interval
-contract Vesting  {
+contract Vesting is AccessControl {
     using SafeMath for uint256;
     using SafeERC20 for AuditToken;
 
@@ -19,9 +20,30 @@ contract Vesting  {
         bool notStaked;
     }
 
+
+    bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
+    bytes32 public constant MIGRATOR_ROLE = keccak256("MIGRATOR_ROLE");
+
+
+    modifier isController {
+            require(hasRole(CONTROLLER_ROLE, msg.sender), "Vesting::isController - Caller is not a controller");
+
+        _;
+    }
+
+
+    modifier isMigrator {
+            require(hasRole(MIGRATOR_ROLE, msg.sender), "Vesting::isMigrator - Caller is not a migrator");
+
+        _;
+    }
+  
+
     event VestedPortionReleased(uint256 amount, address user);
     event StakingRewardsReleased(uint256 amount, address user);
     event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
+    event MemberFundedVerify(address beneficiary, uint256 amount, bool notStaked);
+
     event VestingFunded(uint256 amount);
     event Revoke(address user);
     event Reinstate(address user);
@@ -37,41 +59,30 @@ contract Vesting  {
     uint256 public constant CLIFF = 0;      // 14 days
 
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
-    // uint256 public constant STAKING_RATIO = 50;
-    address public admin;
     uint256 public totalRedeemable;
     
 
     /**
         * @notice Specify address of token contract for case with no white list required
-        * @param _admin address of person who can revoke vesting for the user
         * @param _tokenAddress {address} address of token contract      
      */
     
-     constructor (address _admin,
-                 address _tokenAddress,
+     constructor (address _tokenAddress,
                  uint256 _stakingRatio) {
        
         require(_tokenAddress != address(0), "Vesting:constructor - token address can't be 0");
-        require(_admin != address(0), "Vesting:constructor - admin address can't be 0");
         require(_stakingRatio !=0, "Vesting:constructor - staking ratio can't be 0");
 
         duration = DURATION;
-        startCountDown = block.timestamp;   
+        startCountDown = block.timestamp - 1497600;   
         cliff = startCountDown.add(CLIFF);
         _token = AuditToken(_tokenAddress);   
-        admin = _admin;     
         stakingRatio = _stakingRatio;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
     }
 
-       /**
-    * @dev to check if user is authorized to do admin actions
-     */
-    modifier isAdmin {
-            require(msg.sender == admin, "Sale:isAdmin - Caller is not an operator");
 
-        _;
-    }
 
     // @notice To return vesting schedule 
     function returnVestingSchedule() external view returns (uint, uint, uint, uint) {
@@ -98,9 +109,9 @@ contract Vesting  {
      * @param amount - amount of tokens being allocated
      * @param notStaked - flag if user is eligible for vesting rewards 
      */
-    function allocateUser(address beneficiary, uint256 amount, bool notStaked) internal {
+    function allocateUser(address beneficiary, uint256 amount, bool notStaked) public isController() {
 
-        require(address(beneficiary) != address(0), "Staking:allocateUser - beneficiary can't be the zero address");      
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
         require(amount != 0, "Vesting:allocateUser Amount can't be 0");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
@@ -117,7 +128,7 @@ contract Vesting  {
      * @param amount - amounts of tokens being allocated
      * @param notStaked - flags if user is eligible for vesting rewards 
      */
-    function allocateUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isAdmin() {
+    function allocateUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isController() {
 
         uint256 length = beneficiary.length;
         require(length <= 346, "Vesting-allocateUserMultiple: List too long");  
@@ -126,12 +137,58 @@ contract Vesting  {
         }
     }
 
+      /**
+     * @dev allocate tokens with verificaton to prevent multiple calls
+     * @param beneficiary - users who gets tokens allocated
+     * @param amount - amounts of tokens being allocated
+     * @param notStaked - flags if user is eligible for vesting rewards 
+     */
+    function allocateUserVerify(address beneficiary, uint256 amount, bool notStaked) isMigrator() public {
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        require(tokenHolder.tokensToSend == 0, "Vesting: this user has been already processed");
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
+        require(amount != 0, "Vesting:allocateUser Amount can't be 0");
+
+        tokenHolder.tokensToSend = amount;
+        tokenHolder.notStaked = notStaked;
+        totalRedeemable = totalRedeemable.add(amount);
+        emit MemberFundedVerify(beneficiary, amount, notStaked);
+
+    }
+
+
+        /**
+     * @dev allocate tokens to early investor or team member
+     * @param beneficiary - user who gets tokens allocated
+     * @param amount - amount of tokens being allocated
+     * @param notStaked - flag if user is eligible for vesting rewards 
+     */
+    function adjustUser(address beneficiary, uint256 amount, uint256 released, bool notStaked) public isController() {
+
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
+        // require(amount != 0, "Vesting:allocateUser Amount can't be 0");
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+
+        if (tokenHolder.tokensToSend > amount)
+            totalRedeemable = totalRedeemable.sub(tokenHolder.tokensToSend.sub(amount));
+        else if (amount > tokenHolder.tokensToSend)
+            totalRedeemable = totalRedeemable.add(amount.sub(tokenHolder.tokensToSend));
+
+        tokenHolder.tokensToSend = amount;
+        tokenHolder.releasedAmount = released;
+        tokenHolder.notStaked = notStaked;
+        emit MemberFunded(beneficiary, amount, notStaked);
+
+    }
+
     /**
     * @dev owner can revoke access to continue vesting of tokens
     * @param _user {address} of user to revoke their right to vesting    
     */
     
-    function revoke(address _user) public isAdmin(){
+    function revoke(address _user) public isController(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
@@ -142,7 +199,7 @@ contract Vesting  {
     * @dev owner can reinstate access to continue vesting of tokens
     * @param _user {address} of user to reinstate their right to vesting    
     */
-    function reinstate(address _user) public isAdmin(){
+    function reinstate(address _user) public isController(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = false; 
