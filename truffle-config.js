@@ -6,7 +6,9 @@ dotenv.config();
 
 
 
-const HDWalletProvider = require("truffle-hdwallet-provider");
+// const HDWalletProvider = require("truffle-hdwallet-provider");
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+
 const MNEMONIC = process.env.MNEMONIC
 const INFURA_KEY = process.env.INFURA_KEY;
 const maticmumbai_rpc_url = 'https://matic-mumbai.chainstacklabs.com'
@@ -63,6 +65,21 @@ module.exports = {
       },
       network_id: "*",
       gas: 10000000
+
+
+    },
+
+    goerli: {
+      provider: function () {
+        return new HDWalletProvider(
+          MNEMONIC,
+          "https://goerli.infura.io/v3/" + INFURA_KEY
+        );
+      },
+      network_id: "5",
+      gas: 10000000,
+      skipDryRun: true,
+
 
 
     },
