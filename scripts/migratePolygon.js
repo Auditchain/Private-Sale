@@ -78,6 +78,11 @@ const vestingAddressTwoPolygon = process.env.VESTING_ADDRESS_TWO_POLYGON;
 const saleAddressPolygon = process.env.SALE_ADDRESS_POLYGON;
 const saleAddressPolygonOld = process.env.SALE_ADDRESS_POLYGON_OLD;
 
+const emailUser = process.env.EMAILADDRESS;
+const emailPass = process.env.PASSWORD;
+
+
+
 
 
 const provider = new HDWalletProvider(private_key, main_infura_server); // change to main_infura_server or another testnet. 
@@ -297,8 +302,8 @@ async function sendNotification(txData, status, tx) {
             port: 587,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: 'noreply@auditchain.com', // generated ethereal user
-                pass: '7bjVYhUMgf4wPCC', // generated ethereal password
+                user: emailUser, // generated ethereal user
+                pass: emailPass, // generated ethereal password
             },
         });
 

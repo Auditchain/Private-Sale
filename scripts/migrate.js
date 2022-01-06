@@ -63,6 +63,8 @@ const main_infura_server = process.env.MAINNET_INFURA_SERVER;
 const goerli_infura_server = process.env.GOERLI_INFURA_SERVER;
 const polygon_infura_server = process.env.POLYGON_INFURA_SERVER;
 const mumbai_infuara_server = process.env.MUMBAI_INFURA_SERVER;
+const emailUser = process.env.EMAILADDRESS;
+const emailPass = process.env.PASSWORD;
 
 
 const local_host = process.env.LOCAL;
@@ -234,8 +236,8 @@ async function sendNotification(txData, status, tx) {
             port: 587,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: 'noreply@auditchain.com', // generated ethereal user
-                pass: '7bjVYhUMgf4wPCC', // generated ethereal password
+                user: emailUser, // generated ethereal user
+                pass: emailPass, // generated ethereal password
             },
         });
 
