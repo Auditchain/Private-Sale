@@ -1,6 +1,6 @@
 pragma solidity =0.8.0;
 
-// SPDX-License-: MITIdentifier
+// SPDX-License-Identifier: MIT
 
 
 
@@ -24,7 +24,7 @@ abstract contract Context {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -91,7 +91,7 @@ library Strings {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -116,7 +116,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -145,7 +145,7 @@ abstract contract ERC165 is IERC165 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -396,7 +396,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 /**
  * @title Whitelist
  * @dev this contract enables whitelisting of users.

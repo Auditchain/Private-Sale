@@ -82,7 +82,7 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -309,7 +309,7 @@ library SafeMath {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -520,7 +520,7 @@ library Address {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -619,7 +619,7 @@ library SafeERC20 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -817,7 +817,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -851,7 +851,7 @@ function getEstimatedDAIForEth(uint ethAmount) public view returns (uint256[] me
 
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -887,7 +887,80 @@ function getEstimatedDAIForEth(uint256 ethAmount) public view returns (uint256[]
 
 }
 
+// SPDX-License-Identifier: MIT
 
+
+interface AggregatorV3Interface {
+  function decimals() external view returns (uint8);
+
+  function description() external view returns (string memory);
+
+  function version() external view returns (uint256);
+
+  // getRoundData and latestRoundData should both raise "No data present"
+  // if they do not have data to report, instead of returning unset values
+  // which could be misinterpreted as actual reported values.
+  function getRoundData(uint80 _roundId)
+    external
+    view
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
+
+  function latestRoundData()
+    external
+    view
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
+}
+
+// SPDX-License-Identifier: MIT
+
+
+
+
+
+contract PriceConsumerV3 {
+
+    AggregatorV3Interface internal priceFeed;
+
+    /**
+     * Network: Mumbai Testnet 
+     * Aggregator: MATIC/USD
+     * Address: 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+     * Address main: 0xAB594600376Ec9fD91F8e885dADF0CE036862dE0
+     */
+    constructor() {
+        priceFeed = AggregatorV3Interface(0xAB594600376Ec9fD91F8e885dADF0CE036862dE0);
+    }
+
+    /**
+     * Returns the latest price
+     */
+    function getLatestPrice() public view returns (int) {
+        // (
+        //     , 
+        //     int price,
+        //     ,
+        //     ,
+            
+        // ) = priceFeed.latestRoundData();
+        // return price;
+    return 400000000000;
+    }
+
+}
+
+// SPDX-License-Identifier: MIT
 
 
 
@@ -911,7 +984,7 @@ abstract contract Context {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -978,7 +1051,7 @@ library Strings {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1003,7 +1076,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1032,7 +1105,7 @@ abstract contract ERC165 is IERC165 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1283,7 +1356,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 /**
  * @title Whitelist
  * @dev this contract enables whitelisting of users.
@@ -1407,7 +1480,7 @@ contract WhiteList is  AccessControl{
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1435,7 +1508,7 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1790,7 +1863,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {}
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1833,7 +1906,7 @@ abstract contract ERC20Burnable is Context, ERC20 {
     }
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 
@@ -1919,7 +1992,7 @@ contract Locked is AccessControl {
 
 }
 
-
+// SPDX-License-Identifier: MIT
 
 
 pragma experimental ABIEncoderV2;
@@ -1966,7 +2039,7 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
     /// @dev Constructor that gives an account all initial tokens.
     constructor(address account) ERC20("Auditchain", "AUDT") {
         require(account != address(0), "AuditToken:constructor - Address can't be 0");
-        // _mint(account, INITIAL_SUPPLY);      
+        _mint(account, 250000000000000000000000);      
         _setupRole(DEFAULT_ADMIN_ROLE, account);
     }
 
@@ -2167,6 +2240,7 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
 
 }
 
+// SPDX-License-Identifier: MIT
 
 
 
@@ -2177,7 +2251,7 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
 
 // @note this contract can be inherited by Sale contract 
 // control release of tokens through even time release based on the inputted duration time interval
-contract Vesting  {
+contract Vesting is AccessControl {
     using SafeMath for uint256;
     using SafeERC20 for AuditToken;
 
@@ -2188,9 +2262,30 @@ contract Vesting  {
         bool notStaked;
     }
 
+
+    bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
+    bytes32 public constant MIGRATOR_ROLE = keccak256("MIGRATOR_ROLE");
+
+
+    modifier isController {
+            require(hasRole(CONTROLLER_ROLE, msg.sender), "Vesting::isController - Caller is not a controller");
+
+        _;
+    }
+
+
+    modifier isMigrator {
+            require(hasRole(MIGRATOR_ROLE, msg.sender), "Vesting::isMigrator - Caller is not a migrator");
+
+        _;
+    }
+  
+
     event VestedPortionReleased(uint256 amount, address user);
     event StakingRewardsReleased(uint256 amount, address user);
     event MemberFunded(address beneficiary, uint256 amount, bool notStaked);
+    event MemberFundedVerify(address beneficiary, uint256 amount, bool notStaked);
+
     event VestingFunded(uint256 amount);
     event Revoke(address user);
     event Reinstate(address user);
@@ -2206,41 +2301,30 @@ contract Vesting  {
     uint256 public constant CLIFF = 0;      // 14 days
 
     uint256 public constant DURATION = 60 * 60 * 24 * 366;  // 366 days
-    // uint256 public constant STAKING_RATIO = 50;
-    address public admin;
     uint256 public totalRedeemable;
     
 
     /**
         * @notice Specify address of token contract for case with no white list required
-        * @param _admin address of person who can revoke vesting for the user
         * @param _tokenAddress {address} address of token contract      
      */
     
-     constructor (address _admin,
-                 address _tokenAddress,
+     constructor (address _tokenAddress,
                  uint256 _stakingRatio) {
        
         require(_tokenAddress != address(0), "Vesting:constructor - token address can't be 0");
-        require(_admin != address(0), "Vesting:constructor - admin address can't be 0");
         require(_stakingRatio !=0, "Vesting:constructor - staking ratio can't be 0");
 
         duration = DURATION;
-        startCountDown = block.timestamp;   
+        startCountDown = block.timestamp - 1497600;   
         cliff = startCountDown.add(CLIFF);
         _token = AuditToken(_tokenAddress);   
-        admin = _admin;     
         stakingRatio = _stakingRatio;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
     }
 
-       /**
-    * @dev to check if user is authorized to do admin actions
-     */
-    modifier isAdmin {
-            require(msg.sender == admin, "Sale:isAdmin - Caller is not an operator");
 
-        _;
-    }
 
     // @notice To return vesting schedule 
     function returnVestingSchedule() external view returns (uint, uint, uint, uint) {
@@ -2267,9 +2351,9 @@ contract Vesting  {
      * @param amount - amount of tokens being allocated
      * @param notStaked - flag if user is eligible for vesting rewards 
      */
-    function allocateUser(address beneficiary, uint256 amount, bool notStaked) internal {
+    function allocateUser(address beneficiary, uint256 amount, bool notStaked) public isController() {
 
-        require(address(beneficiary) != address(0), "Staking:allocateUser - beneficiary can't be the zero address");      
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
         require(amount != 0, "Vesting:allocateUser Amount can't be 0");
 
         TokenHolder storage tokenHolder = tokenHolders[beneficiary];
@@ -2286,7 +2370,7 @@ contract Vesting  {
      * @param amount - amounts of tokens being allocated
      * @param notStaked - flags if user is eligible for vesting rewards 
      */
-    function allocateUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isAdmin() {
+    function allocateUserMultiple(address[] memory beneficiary, uint256[] memory amount, bool[] memory notStaked) public isController() {
 
         uint256 length = beneficiary.length;
         require(length <= 346, "Vesting-allocateUserMultiple: List too long");  
@@ -2295,12 +2379,58 @@ contract Vesting  {
         }
     }
 
+      /**
+     * @dev allocate tokens with verificaton to prevent multiple calls
+     * @param beneficiary - users who gets tokens allocated
+     * @param amount - amounts of tokens being allocated
+     * @param notStaked - flags if user is eligible for vesting rewards 
+     */
+    function allocateUserVerify(address beneficiary, uint256 amount, bool notStaked) isMigrator() public {
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+        require(tokenHolder.tokensToSend == 0, "Vesting: this user has been already processed");
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
+        require(amount != 0, "Vesting:allocateUser Amount can't be 0");
+
+        tokenHolder.tokensToSend = amount;
+        tokenHolder.notStaked = notStaked;
+        totalRedeemable = totalRedeemable.add(amount);
+        emit MemberFundedVerify(beneficiary, amount, notStaked);
+
+    }
+
+
+        /**
+     * @dev allocate tokens to early investor or team member
+     * @param beneficiary - user who gets tokens allocated
+     * @param amount - amount of tokens being allocated
+     * @param notStaked - flag if user is eligible for vesting rewards 
+     */
+    function adjustUser(address beneficiary, uint256 amount, uint256 released, bool notStaked) public isController() {
+
+        require(address(beneficiary) != address(0), "Vesting:allocateUser - beneficiary can't be the zero address");      
+        // require(amount != 0, "Vesting:allocateUser Amount can't be 0");
+
+        TokenHolder storage tokenHolder = tokenHolders[beneficiary];
+
+        if (tokenHolder.tokensToSend > amount)
+            totalRedeemable = totalRedeemable.sub(tokenHolder.tokensToSend.sub(amount));
+        else if (amount > tokenHolder.tokensToSend)
+            totalRedeemable = totalRedeemable.add(amount.sub(tokenHolder.tokensToSend));
+
+        tokenHolder.tokensToSend = amount;
+        tokenHolder.releasedAmount = released;
+        tokenHolder.notStaked = notStaked;
+        emit MemberFunded(beneficiary, amount, notStaked);
+
+    }
+
     /**
     * @dev owner can revoke access to continue vesting of tokens
     * @param _user {address} of user to revoke their right to vesting    
     */
     
-    function revoke(address _user) public isAdmin(){
+    function revoke(address _user) public isController(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = true; 
@@ -2311,7 +2441,7 @@ contract Vesting  {
     * @dev owner can reinstate access to continue vesting of tokens
     * @param _user {address} of user to reinstate their right to vesting    
     */
-    function reinstate(address _user) public isAdmin(){
+    function reinstate(address _user) public isController(){
 
         TokenHolder storage tokenHolder = tokenHolders[_user];
         tokenHolder.revoked = false; 
@@ -2380,6 +2510,7 @@ contract Vesting  {
     
 }
 
+// SPDX-License-Identifier: MIT
 
 
 
@@ -2387,6 +2518,7 @@ contract Vesting  {
 
 
 
+// 
 // 
 
 
@@ -2401,9 +2533,8 @@ contract Sale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
-    uint256 private _tokensLeft = 15e24;                // Amount of tokens in sale contract at given moment    
-    // UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
-    SushiSwapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
+    uint256 private _tokensLeft = 5e24;                 // Amount of tokens in sale contract at given moment    Polygon version
+    PriceConsumerV3 private _priceConsumerV3;   // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
     uint256 private _DAIRaised;                         // Amount of DAI raised
@@ -2424,22 +2555,20 @@ contract Sale is Vesting, ReentrancyGuard {
      * @param auditToken Address of the token being sold
      * @param DAIAddress Address of DAI token
      * @param whitelist Address of whitelist contract
-     * @param admin  user who can fund contract and pull out unused tokens
      */
     constructor (address oracle, 
                  address payable cWallet, 
                  address auditToken, 
                  address DAIAddress,
                  address whitelist,
-                 address admin, 
-                 uint256 stakingRatio) Vesting(admin, auditToken, stakingRatio) {
+                 uint256 stakingRatio) Vesting( auditToken, stakingRatio)  {
         require(oracle != address(0), "Sale: oracle is the zero address");
         require(cWallet != address(0), "Sale: wallet is the zero address");
         require(DAIAddress != address(0), "Sale: DAI is zero address");
         require(whitelist != address(0), "Sale: Whitelist is zero address");
       
         _wallet = cWallet;
-        _uniswapPriceOracle = SushiSwapPriceOracle(oracle);
+        _priceConsumerV3 = PriceConsumerV3(oracle);
         whiteList = WhiteList(whitelist);
         DAI = DAIAddress;
     }
@@ -2466,8 +2595,8 @@ contract Sale is Vesting, ReentrancyGuard {
      */
     function calculateDAIForEther(uint256 amount) public view returns (uint256) {
 
-       uint256[] memory pairAmounts = _uniswapPriceOracle.getEstimatedDAIForEth(amount);
-       return pairAmounts[0];
+       int256 price = _priceConsumerV3.getLatestPrice();
+       return amount.mul(uint256(price)).div(1e8);
     }
 
     /**
