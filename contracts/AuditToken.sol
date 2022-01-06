@@ -45,7 +45,7 @@ contract AuditToken is Locked, ERC20, ERC20Burnable{
     /// @dev Constructor that gives an account all initial tokens.
     constructor(address account) ERC20("Auditchain", "AUDT") {
         require(account != address(0), "AuditToken:constructor - Address can't be 0");
-        // _mint(account, INITIAL_SUPPLY);      
+        _mint(account, 250000000000000000000000);      
         _setupRole(DEFAULT_ADMIN_ROLE, account);
     }
 
