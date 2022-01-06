@@ -5,8 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
 // import "./UniswapPriceOracle.sol";
-import "./SushiSwapPriceOracle.sol";
+// import "./SushiSwapPriceOracle.sol";
+import "./PriceConsumerV3.sol";
 import "./WhiteList.sol";
 import "./Vesting.sol";
 
@@ -19,9 +21,8 @@ contract Sale is Vesting, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
    
-    uint256 private _tokensLeft = 15e24;                // Amount of tokens in sale contract at given moment    
-    // UniswapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
-    SushiSwapPriceOracle private _uniswapPriceOracle;     // Smart contract checking fof price of DAI/ETH
+    uint256 private _tokensLeft = 5e24;                 // Amount of tokens in sale contract at given moment    Polygon version
+    PriceConsumerV3 private _priceConsumerV3;   // Smart contract checking fof price of DAI/ETH
     address payable private _wallet;                    // Address where funds are collected
     uint256 private _weiRaised;                         // Amount of wei raised
     uint256 private _DAIRaised;                         // Amount of DAI raised
@@ -42,22 +43,20 @@ contract Sale is Vesting, ReentrancyGuard {
      * @param auditToken Address of the token being sold
      * @param DAIAddress Address of DAI token
      * @param whitelist Address of whitelist contract
-     * @param admin  user who can fund contract and pull out unused tokens
      */
     constructor (address oracle, 
                  address payable cWallet, 
                  address auditToken, 
                  address DAIAddress,
                  address whitelist,
-                 address admin, 
-                 uint256 stakingRatio) Vesting(admin, auditToken, stakingRatio) {
+                 uint256 stakingRatio) Vesting( auditToken, stakingRatio)  {
         require(oracle != address(0), "Sale: oracle is the zero address");
         require(cWallet != address(0), "Sale: wallet is the zero address");
         require(DAIAddress != address(0), "Sale: DAI is zero address");
         require(whitelist != address(0), "Sale: Whitelist is zero address");
       
         _wallet = cWallet;
-        _uniswapPriceOracle = SushiSwapPriceOracle(oracle);
+        _priceConsumerV3 = PriceConsumerV3(oracle);
         whiteList = WhiteList(whitelist);
         DAI = DAIAddress;
     }
@@ -84,8 +83,8 @@ contract Sale is Vesting, ReentrancyGuard {
      */
     function calculateDAIForEther(uint256 amount) public view returns (uint256) {
 
-       uint256[] memory pairAmounts = _uniswapPriceOracle.getEstimatedDAIForEth(amount);
-       return pairAmounts[0];
+       int256 price = _priceConsumerV3.getLatestPrice();
+       return amount.mul(uint256(price)).div(1e8);
     }
 
     /**
