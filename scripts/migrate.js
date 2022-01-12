@@ -94,6 +94,7 @@ const web3Polygon = new Web3(providerPolygon);
 
 const vestingOne = new web3Polygon.eth.Contract(VESTING["abi"], vestingAddressOnePolygon);
 const vestingTwo = new web3Polygon.eth.Contract(VESTING["abi"], vestingAddressTwoPolygon);
+let readTxCount = 0;
 
 
 async function sleep(delayTime) {
@@ -115,6 +116,13 @@ async function getBurnInfo(transactionHash) {
     }
     catch (err) {
         console.log(err);
+        readTxCount++;
+        if (readTxCount < 6) {
+            getBurnInfo(transactionHash)
+        } else {
+            readTxCount = 0;
+            console.log("Reached 6 attempts. Giving up");
+        }
     }
 }
 
